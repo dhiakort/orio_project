@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════
+   ORIO — main.css
+   Variables CSS, reset, navbar, composants partagés, utilitaires
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Variables ────────────────────────────────────────────────── */
+:root {
+  --indigo:       #6366f1;
+  --indigo-dark:  #4f46e5;
+  --indigo-light: #e0e7ff;
+  --blue:         #38bdf8;
+  --blue-dark:    #0284c7;
+  --green:        #34d399;
+  --green-dark:   #059669;
+  --green-light:  #d1fae5;
+  --yellow:       #fbbf24;
+  --yellow-light: #fef3c7;
+  --orange:       #fb923c;
+  --red:          #f87171;
+  --red-light:    #fee2e2;
+  --purple:       #a78bfa;
+  --purple-dark:  #7c3aed;
+  --purple-light: #ede9fe;
+  --pink:         #f472b6;
+  --pink-light:   #fce7f3;
+  --white:        #fff;
+  --bg:           #f8faff;
+  --text:         #1e293b;
+  --text-soft:    #64748b;
+  --border:       #e2e8f0;
+  --radius:       20px;
+  --radius-sm:    12px;
+}
+
+/* ── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────── */
+.navbar {
+  position: sticky; top: 0; z-index: 100; height: 64px;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(18px);
+  border-bottom: 1.5px solid rgba(99,102,241,.08);
+  display: flex; align-items: center; padding: 0 32px; gap: 14px;
+  box-shadow: 0 2px 14px rgba(99,102,241,.07);
+}
+.nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center;
+  justify-content: center; font-size: 18px;
+}
+.nav-logo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.nav-logo-txt {
+  font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 900;
+  background: linear-gradient(135deg, var(--indigo), var(--blue-dark));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-sep   { width: 1px; height: 28px; background: var(--border); }
+.nav-page  { font-size: 14px; font-weight: 700; color: var(--text-soft); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.nav-pill  { display: flex; align-items: center; gap: 7px; background: var(--indigo-light); border-radius: 99px; padding: 5px 12px; }
+.nav-av    { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; }
+.nav-name  { font-size: 13px; font-weight: 700; color: var(--indigo-dark); }
+.btn-back  {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 700; color: var(--text-soft);
+  background: none; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 5px 12px; cursor: pointer; text-decoration: none;
+  transition: color .2s, border-color .2s;
+}
+.btn-back:hover { color: var(--indigo); border-color: var(--indigo); }
+
+/* ── Steps (breadcrumb progress) ─────────────────────────────── */
+.steps { display: flex; align-items: center; }
+.step  { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--text-soft); }
+.step-n {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900;
+  background: var(--border); color: var(--text-soft); flex-shrink: 0;
+}
+.step.done   .step-n { background: var(--green); color: white; }
+.step.active .step-n { background: var(--indigo); color: white; }
+.step.active { color: var(--indigo); }
+.step.done   { color: var(--green-dark); }
+.step-arr    { color: var(--border); margin: 0 8px; font-size: 13px; }
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 26px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: white;
+  font-size: 14px; font-weight: 700;
+  padding: 12px 22px; border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), opacity .4s;
+  opacity: 0; z-index: 9999; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.ok   { background: linear-gradient(135deg, #059669, #34d399); }
+.toast.err  { background: linear-gradient(135deg, #dc2626, #f87171); }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .navbar { padding: 0 16px; }
+  .steps  { display: none; }
+}

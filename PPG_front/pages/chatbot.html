@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Assistant IA — ORIO</title>
+  <meta name="description" content="Posez toutes vos questions à l'assistant IA ORIO, propulsé par Grok. Supporte également la saisie vocale pour les élèves en difficulté d'écriture.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* ═══════════════════════════════════════════
+       CHATBOT PAGE — PREMIUM PASTEL LIGHT THEME
+    ═══════════════════════════════════════════ */
+    :root {
+      --bg-light: #f4f6f9;
+      --panel-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-soft: #475569;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      
+      --user-bubble: #e0e7ff;
+      --user-text: #1e1b4b;
+      --bot-bubble: #ffffff;
+      --bot-text: #1e293b;
+      
+      --suggestion-bg: #f1f5f9;
+      --suggestion-border: #cbd5e1;
+      --suggestion-hover: #e2e8f0;
+      
+      --warn-bg: #fef3c7;
+      --warn-border: #fde68a;
+      --warn-text: #78350f;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Nunito', sans-serif;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    /* ── Split Layout Container ──────────────── */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Counselor Sidebar ───────────────────── */
+    .counselor-sidebar {
+      width: 300px;
+      background: var(--panel-bg);
+      border-right: 1.5px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar-header h3 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+    .sidebar-header p {
+      font-size: 12.5px;
+      color: var(--text-soft);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .student-select-wrapper {
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .student-select-wrapper label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-soft);
+    }
+    .student-select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-dark);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .student-select:focus {
+      border-color: var(--primary);
+    }
+
+    /* Selected Student Card */
+    .student-profile-card {
+      background: #f8fafc;
+      border: 1.5px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeInUp 0.4s ease both;
+    }
+    .student-profile-card h4 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      border-bottom: 1.5px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    .profile-meta-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .meta-label {
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+    .meta-val {
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .metric-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .metric-section h5 {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-soft);
+    }
+    .riasec-badge-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .riasec-badge {
+      background: var(--user-bubble);
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+    .bf-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: #d1fae5;
+      color: #065f46;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+
+    /* ── Chat Container (Main Pane) ──────────── */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Header ────────────────────────────── */
+    .chat-header {
+      background: var(--panel-bg);
+      border-bottom: 1.5px solid var(--border-color);
+      padding: 0 24px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text-soft);
+      font-size: 18px;
+      text-decoration: none;
+      border: 1.5px solid var(--border-color);
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .btn-back:hover {
+      background: var(--bg-light);
+      color: var(--primary-dark);
+      transform: translateX(-2px);
+    }
+    .chat-bot-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .bot-avatar {
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.2);
+    }
+    .bot-name {
+      font-family: 'Baloo 2', cursive;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+    .bot-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    
+    /* Engine status badges */
+    .engine-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: var(--bg-light);
+      border: 1.5px solid var(--border-color);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-soft);
+      transition: all 0.3s;
+    }
+    .engine-badge.grok { 
+      border-color: rgba(99,102,241,0.25); 
+      background-color: rgba(99,102,241,0.06);
+      color: var(--primary-dark); 
+    }
+    .engine-badge.fallback { 
+      border-color: var(--warn-border); 
+      background-color: var(--warn-bg);
+      color: var(--warn-text); 
+    }
+    .engine-badge .eng-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .engine-badge.fallback .eng-dot { background: #d97706; }
+
+    .btn-clear {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      color: #991b1b;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-clear:hover { background: #fee2e2; }
+
+    /* ── Chat Area ─────────────────────────── */
+    .chat-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+      overflow-y: auto;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+    #messages::-webkit-scrollbar { width: 5px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 99px; }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      flex: 1;
+      animation: fadeInUp 0.5s ease both;
+    }
+    .empty-state-icon {
+      width: 76px; height: 76px;
+      border-radius: 22px;
+      background: #e0e7ff;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .empty-state-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+    .empty-state-sub {
+      font-size: 14px;
+      color: var(--text-soft);
+      line-height: 1.6;
+      max-width: 440px;
+      margin-bottom: 24px;
+    }
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .suggestion-chip {
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: var(--suggestion-bg);
+      border: 1.5px solid var(--suggestion-border);
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .suggestion-chip:hover {
+      background: var(--suggestion-hover);
+      border-color: var(--text-soft);
+      color: var(--text-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Message bubbles */
+    .msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: msgIn 0.25s ease-out both;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user { align-items: flex-end; }
+    .msg.bot  { align-items: flex-start; }
+    .msg.error { align-items: flex-start; }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .msg.user .msg-row { flex-direction: row-reverse; }
+
+    .msg-avatar {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .msg.bot  .msg-avatar { background: linear-gradient(135deg,#6366f1,#38bdf8); }
+    .msg.user .msg-avatar { background: #7c3aed; color: white; }
+
+    .msg-bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .msg.user .msg-bubble {
+      background: var(--user-bubble);
+      color: var(--user-text);
+      border-bottom-right-radius: 4px;
+      border: 1px solid rgba(99,102,241,0.15);
+    }
+    .msg.bot .msg-bubble {
+      background: var(--bot-bubble);
+      color: var(--bot-text);
+      border: 1.5px solid var(--border-color);
+      border-bottom-left-radius: 4px;
+    }
+    .msg.error .msg-bubble {
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      color: #991b1b;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 6px;
+    }
+    .msg-time {
+      font-size: 11px;
+      color: var(--text-soft);
+      opacity: 0.8;
+    }
+    .msg-engine {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 99px;
+      background: rgba(99,102,241,0.08);
+      color: var(--primary-dark);
+    }
+    .msg-engine.fallback {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    /* Thinking dots */
+    .thinking .msg-bubble {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 16px 20px;
+    }
+    .thinking-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-soft);
+      animation: thinkDot 1.4s ease-in-out infinite;
+    }
+    .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes thinkDot {
+      0%,80%,100% { transform: scale(1); opacity: 0.4; }
+      40% { transform: scale(1.3); opacity: 1; background: var(--primary); }
+    }
+
+    /* ── Input Area ────────────────────────── */
+    .input-area {
+      background: var(--panel-bg);
+      border-top: 1.5px solid var(--border-color);
+      padding: 16px 0 20px;
+      margin-top: auto;
+    }
+    .input-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .input-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--bg-light);
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      padding: 10px 12px 10px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-box:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+      background-color: #ffffff;
+    }
+    #question {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-dark);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      min-height: 24px;
+      max-height: 120px;
+      padding: 4px 0;
+    }
+    #question::placeholder { color: #94a3b8; }
+
+    .input-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Voice button */
+    #voiceBtn {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-soft);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+    #voiceBtn:hover {
+      background: var(--bg-light);
+      color: var(--text-dark);
+    }
+    #voiceBtn.listening {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #dc2626;
+      animation: listeningPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes listeningPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.2); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+    }
+    #voiceBtn.no-support {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Send button */
+    #send {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 10px rgba(99,102,241,0.25);
+      flex-shrink: 0;
+    }
+    #send:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(99,102,241,0.35);
+    }
+    #send:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    /* Hint bar */
+    .input-hints {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 6px 0;
+      font-size: 11.5px;
+      color: var(--text-soft);
+      opacity: 0.9;
+    }
+    .voice-hint { display: flex; align-items: center; gap: 5px; }
+    #voiceStatus {
+      font-size: 12px;
+      font-weight: 700;
+      color: #dc2626;
+      display: none;
+    }
+    #voiceStatus.active { display: inline; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--text-dark);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      z-index: 200;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.success { background: #10b981; }
+    #toast.error { background: #ef4444; }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive styling */
+    @media (max-width: 850px) {
+      .app-layout {
+        flex-direction: column;
+      }
+      .counselor-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1.5px solid var(--border-color);
+        padding: 16px;
+      }
+      .chat-container {
+        height: calc(100vh - 180px);
+      }
+    }
+    @media (max-width: 600px) {
+      .msg-bubble { max-width: 88%; font-size: 14px; }
+      .engine-badge { display: none; }
+      .chat-header { padding: 0 14px; }
+      .btn-clear span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Counselor Workspace Panel (Visible for staff) -->
+    <aside class="counselor-sidebar" id="counselorSidebar" style="display: none;">
+      <div class="sidebar-header">
+        <h3>Espace Conseiller</h3>
+        <p>Sélectionnez un élève pour analyser son profil RIASEC, Big Five, ses moyennes et formuler des conseils.</p>
+      </div>
+      <div class="student-select-wrapper">
+        <label for="studentSelect">Élève à conseiller :</label>
+        <select id="studentSelect" class="student-select">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+      <div class="student-profile-card" id="studentProfileCard" style="display: none;">
+        <h4 id="profileCardName">Nom</h4>
+        <div class="profile-meta-item">
+          <span class="meta-label">Classe/Niveau :</span>
+          <span class="meta-val" id="profileCardNiveau">—</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="meta-label">Spécialité :</span>
+          <span class="meta-val" id="profileCardSpec">—</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="meta-label">Moyenne Générale :</span>
+          <span class="meta-val" id="profileCardMoy">—</span>
+        </div>
+        <div class="metric-section">
+          <h5>Intérêts (RIASEC)</h5>
+          <div class="riasec-badge-list" id="profileCardRiasec">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div class="metric-section">
+          <h5>Portrait Big Five</h5>
+          <span class="bf-badge" id="profileCardB5">—</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat container -->
+    <div class="chat-container">
+      <!-- Header -->
+      <header class="chat-header">
+        <div class="chat-header-left">
+          <a href="dashboard.html" class="btn-back" title="Retour au dashboard">←</a>
+          <div class="chat-bot-info">
+            <div class="bot-avatar">🤖</div>
+            <div>
+              <div class="bot-name">Assistant ORIO</div>
+              <div class="bot-status">
+                <span class="status-dot"></span>
+                <span id="statusLabel">En ligne · Grok AI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="engine-badge grok" id="engineBadge">
+            <span class="eng-dot"></span>
+            <span id="engineLabel">Grok AI</span>
+          </div>
+          <button class="btn-clear" id="clearBtn" title="Effacer la conversation">
+            🗑️ <span>Effacer</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Body -->
+      <div class="chat-wrapper">
+        <div id="messages">
+          <!-- Empty state -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">🧠</div>
+            <div class="empty-state-title">Bonjour ! Je suis votre assistant IA</div>
+            <div class="empty-state-sub">
+              Posez-moi n'importe quelle question — roadmap, conseils d'orientation, compétences ou informations générales.
+              Vous pouvez aussi utiliser votre <strong style="color:var(--primary-dark);">voix</strong> 🎤 pour dicter vos questions.
+            </div>
+            <div class="suggestions">
+              <button class="suggestion-chip" data-q="Quelles sont mes prochaines étapes dans ma roadmap ?">📍 Mes prochaines étapes</button>
+              <button class="suggestion-chip" data-q="Quelles filières correspondent à mon profil RIASEC ?">🎯 Filières recommandées</button>
+              <button class="suggestion-chip" data-q="Comment améliorer mes compétences en mathématiques ?">📚 Améliorer mes maths</button>
+              <button class="suggestion-chip" data-q="Quels métiers correspondent à un profil scientifique ?">🔬 Métiers scientifiques</button>
+              <button class="suggestion-chip" data-q="Donne-moi des conseils pour me préparer au bac.">🎓 Préparer le bac</button>
+              <button class="suggestion-chip" data-q="Comment puis-je m'inscrire à une université en Algérie ?">🏛️ Inscription université</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-area">
+        <div class="input-inner">
+          <div class="input-box">
+            <textarea
+              id="question"
+              placeholder="Posez votre question… (Entrée pour envoyer, Maj+Entrée pour nouvelle ligne)"
+              rows="1"
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <div class="input-actions">
+              <button id="voiceBtn" title="Dicter votre question (pour les élèves en difficulté d'écriture)">🎤</button>
+              <button id="send" title="Envoyer">➤</button>
+            </div>
+          </div>
+          <div class="input-hints">
+            <div class="voice-hint">
+              🎤 <span id="voiceStatus"></span>
+              <span id="voiceHintText">Cliquez sur le micro pour dicter votre question</span>
+            </div>
+            <span>Propulsé par <strong style="color:var(--primary-dark);">Grok AI secure proxy</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script src="shared.js"></script>
+  <script src="../assets/js/chatbot.js"></script>
+</body>
+</html>

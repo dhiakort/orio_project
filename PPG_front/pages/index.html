@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ORIO — AI Smart Orientation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ═══════════ NAVBAR ═══════════ -->
+  <nav class="navbar" id="navbar">
+    <a class="nav-logo" href="index.html">
+      <div class="nav-logo-icon"><img src="../assets/images/logo.png" alt="ORIO" style="width:40px;height:40px;object-fit:contain;background-color:transparent;mix-blend-mode:screen;"/></div>
+      <div>
+        <span class="nav-logo-text">ORIO</span>
+        <span class="nav-logo-tagline">AI Smart Orientation</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#how" class="nav-link">Comment ça marche</a></li>
+      <li><a href="#features" class="nav-link">Fonctionnalités</a></li>
+      <li><a href="#tests" class="nav-link">Les tests</a></li>
+    </ul>
+
+    <!-- Visiteur non connecté -->
+    <div class="nav-cta" id="nav-guest">
+      <a href="login.html" class="btn-nav-login">Se connecter</a>
+      <a href="register.html" class="btn-nav-register">Commencer gratuitement 🚀</a>
+    </div>
+
+    <!-- Utilisateur connecté -->
+    <div class="nav-user" id="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-user-name" id="nav-user-name">—</span>
+      <button class="btn-nav-logout" onclick="logout()">Déconnexion</button>
+    </div>
+
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#how" onclick="closeMenu()">💡 Comment ça marche</a>
+    <a href="#features" onclick="closeMenu()">✨ Fonctionnalités</a>
+    <a href="#tests" onclick="closeMenu()">🧠 Les tests</a>
+    <div class="mobile-divider"></div>
+    <a href="login.html">Se connecter</a>
+    <a href="register.html" class="btn-mobile-register">Commencer gratuitement 🚀</a>
+  </div>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero">
+    <!-- Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Floating icons -->
+    <div class="float-icon">📚</div>
+    <div class="float-icon">🧠</div>
+    <div class="float-icon">🎯</div>
+    <div class="float-icon">⭐</div>
+    <div class="float-icon">🚀</div>
+
+    <div class="hero-inner">
+      <!-- Left: text -->
+      <div class="hero-text">
+        <div class="hero-badge">
+          <div class="hero-badge-dot"></div>
+          Plateforme d'orientation intelligente
+        </div>
+
+        <h1 class="hero-title">
+          Trouve ta
+          <span class="highlight"> voie idéale</span><br>
+          avec l'<span class="underline-wave">IA</span> 🎓
+        </h1>
+
+        <p class="hero-desc">
+          ORIO analyse ton profil psychologique et tes résultats scolaires pour te recommander les filières universitaires qui te correspondent vraiment.
+        </p>
+
+        <div class="hero-actions">
+          <a href="register.html" class="btn-hero-primary">
+            Découvrir mon profil 🚀
+          </a>
+          <a href="#how" class="btn-hero-secondary">
+            📖 Comment ça marche ?
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Tests psycho</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-num">95%</div>
+            <div class="stat-label">Précision IA</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-num">5</div>
+            <div class="stat-label">Domaines top</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: visual card -->
+      <div class="hero-visual">
+        <div class="hero-card-main">
+          <div class="hc-header">
+            <div class="hc-avatar">👩‍🎓</div>
+            <div>
+              <div class="hc-name">lyceen</div>
+              <div class="hc-tag">Profil ORIO analysé ✅</div>
+            </div>
+            <div class="hc-badge-bac">🎓 Terminale</div>
+          </div>
+
+          <div class="score-bars">
+            <div class="score-row">
+              <span class="score-label">Informatique</span>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:88%;background:linear-gradient(90deg,#6366f1,#38bdf8)"></div>
+              </div>
+              <span class="score-pct" style="color:#6366f1">88%</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">Médecine</span>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:74%;background:linear-gradient(90deg,#34d399,#059669);animation-delay:.1s"></div>
+              </div>
+              <span class="score-pct" style="color:#34d399">74%</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">Économie</span>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:61%;background:linear-gradient(90deg,#fbbf24,#f59e0b);animation-delay:.2s"></div>
+              </div>
+              <span class="score-pct" style="color:#f59e0b">61%</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">Architecture</span>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:52%;background:linear-gradient(90deg,#f472b6,#ec4899);animation-delay:.3s"></div>
+              </div>
+              <span class="score-pct" style="color:#ec4899">52%</span>
+            </div>
+          </div>
+
+          <div class="result-chips">
+            <span class="chip chip-1">🔬 Investigatif</span>
+            <span class="chip chip-2">⚡ Big Five : Consciencieux</span>
+            <span class="chip chip-3">📐 Analytique</span>
+          </div>
+        </div>
+
+        <!-- Floating mini-cards -->
+        <div class="mini-card">🧠 Profil Big Five analysé</div>
+        <div class="mini-card">🎯 RIASEC : Type I dominant</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ HOW IT WORKS ═══════════ -->
+  <section class="section" id="how">
+    <div class="reveal">
+      <div class="section-tag">💡 Processus</div>
+      <h2 class="section-title">Comment ORIO fonctionne ?</h2>
+      <p class="section-desc">Un parcours simple en 5 étapes pour découvrir les filières qui te correspondent vraiment.</p>
+    </div>
+
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-emoji">📝</div>
+        <div class="step-title">Crée ton compte</div>
+        <div class="step-desc">Inscris-toi en quelques secondes avec ton email et renseigne ton niveau scolaire.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-emoji">📊</div>
+        <div class="step-title">Saisis tes notes</div>
+        <div class="step-desc">Entre tes moyennes par matière. ORIO calcule automatiquement tes points forts académiques.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-emoji">🧠</div>
+        <div class="step-title">Passe les tests</div>
+        <div class="step-desc">3 tests interactifs : personnalité (Big Five), intérêts (RIASEC) et compétences cognitives.</div>
+      </div>
+  
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-emoji">🗺️</div>
+        <div class="step-title">Reçois ta roadmap</div>
+        <div class="step-desc">Découvre les 3 à 5 filières les plus adaptées à ton profil, avec une roadmap personnalisée.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FEATURES ═══════════ -->
+  <div class="features-bg" id="features">
+    <div class="features-inner">
+      <div class="reveal">
+        <div class="section-tag">✨ Fonctionnalités</div>
+        <h2 class="section-title">Tout pour bien s'orienter</h2>
+        <p class="section-desc">Des outils pensés pour les lycéens tunisiens, simples et puissants.</p>
+      </div>
+
+      <div class="features-grid reveal">
+        <div class="feature-card">
+          <div class="feature-icon fi-1">🧬</div>
+          <div class="feature-title">Analyse psychométrique</div>
+          <div class="feature-desc">Tests Big Five, RIASEC et compétences cognitives pour dresser un portrait complet de ta personnalité.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-2">📈</div>
+          <div class="feature-title">Profil académique</div>
+          <div class="feature-desc">Saisie intuitive des notes, calcul automatique de la moyenne et identification de tes matières fortes.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-3">🏆</div>
+          <div class="feature-title">Score de compatibilité</div>
+          <div class="feature-desc">Un pourcentage précis pour chaque filière, combinant données psycho et académiques grâce à l'IA.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-4">🗺️</div>
+          <div class="feature-title">Roadmap personnalisée</div>
+          <div class="feature-desc">Pour chaque domaine recommandé, un plan d'action concret avec les compétences à développer.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-5">📊</div>
+          <div class="feature-title">Visualisations graphiques</div>
+          <div class="feature-desc">Des graphiques clairs pour comprendre ton profil et comparer tes scores par domaine d'études.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-6">🔒</div>
+          <div class="feature-title">Données confidentielles</div>
+          <div class="feature-desc">Tes notes et ton profil psychologique sont sécurisés et jamais partagés avec des tiers.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ TESTS ═══════════ -->
+  <section class="tests-section" id="tests">
+    <div class="reveal">
+      <div class="section-tag">🧠 Les tests</div>
+      <h2 class="section-title">3 tests pour te connaître</h2>
+      <p class="section-desc">Des tests scientifiques reconnus mondialement, adaptés et simplifiés pour toi.</p>
+    </div>
+
+    <div class="tests-grid reveal">
+      <div class="test-card test-card-1">
+        <span class="test-card-emoji">🌟</span>
+        <div class="test-card-title">Test de Personnalité</div>
+        <div class="test-card-desc">Basé sur le modèle des Big Five, il évalue tes 5 grandes dimensions psychologiques pour comprendre qui tu es vraiment.</div>
+        <div class="test-card-tags">
+          <span class="test-tag">Ouverture</span>
+          <span class="test-tag">Consciencieux</span>
+          <span class="test-tag">Extraversion</span>
+          <span class="test-tag">Agréabilité</span>
+          <span class="test-tag">Névrosisme</span>
+        </div>
+      </div>
+      <div class="test-card test-card-2">
+        <span class="test-card-emoji">🎯</span>
+        <div class="test-card-title">Test d'Intérêts RIASEC</div>
+        <div class="test-card-desc">La théorie de Holland classe tes centres d'intérêt en 6 profils pour identifier les domaines qui t'attirent naturellement.</div>
+        <div class="test-card-tags">
+          <span class="test-tag">Réaliste</span>
+          <span class="test-tag">Investigatif</span>
+          <span class="test-tag">Artistique</span>
+          <span class="test-tag">Social</span>
+          <span class="test-tag">Entreprenant</span>
+        </div>
+      </div>
+      <div class="test-card test-card-3">
+        <span class="test-card-emoji">⚡</span>
+        <div class="test-card-title">Test de Compétences</div>
+        <div class="test-card-desc">3 mini-jeux interactifs évaluent ta rapidité de calcul, ton raisonnement logique et ta mémoire visuelle.</div>
+        <div class="test-card-tags">
+          <span class="test-tag">Calcul mental</span>
+          <span class="test-tag">Logique</span>
+          <span class="test-tag">Mémoire</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CTA BANNER ═══════════ -->
+  <div class="cta-banner reveal">
+    <h2 class="cta-title">Prêt(e) à découvrir ta voie ? 🚀</h2>
+    <p class="cta-desc">Rejoins ORIO et obtiens ta recommandation personnalisée en moins de 20 minutes.</p>
+    <a href="register.html" class="btn-cta">Commencer maintenant — c'est gratuit 🎉</a>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <a class="nav-logo" href="index.html" style="display:inline-flex;margin-bottom:12px;">
+          <div class="nav-logo-icon"><img src="../assets/images/logo.png" alt="ORIO" style="width:36px;height:36px;object-fit:contain;"/></div>
+          <div style="margin-left:10px;">
+            <span class="nav-logo-text">ORIO</span>
+            <span class="nav-logo-tagline">AI Smart Orientation</span>
+          </div>
+        </a>
+        <p class="footer-brand-desc">Plateforme d'orientation académique intelligente pour lycéens tunisiens. Combine IA, psychométrie et données académiques.</p>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Plateforme</div>
+        <ul>
+          <li><a href="#how">Comment ça marche</a></li>
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#tests">Les tests</a></li>
+          <li><a href="register.html">S'inscrire</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Tests</div>
+        <ul>
+          <li><a href="#">Big Five</a></li>
+          <li><a href="#">RIASEC</a></li>
+          <li><a href="#">Compétences</a></li>
+          <li><a href="#">Saisie des notes</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Projet</div>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Établissement Sesame</a></li>
+          <li><a href="#">Année 2025–2026</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 ORIO</p>
+      <div class="footer-badges">
+        <span class="footer-badge">🤖 IA</span>
+        <span class="footer-badge">🔒 Sécurisé</span>
+        <span class="footer-badge">🇹🇳 Tunisie</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ─── Navbar scroll ────────────────────────────────────
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // ─── Active nav link on scroll ───────────────────────
+    const sections = document.querySelectorAll('section[id], div[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => observer.observe(s));
+
+    // ─── Mobile menu ─────────────────────────────────────
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const ham  = document.getElementById('hamburger');
+      menu.classList.toggle('open');
+      ham.classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('mobile-menu').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    }
+
+    // ─── Auth state ──────────────────────────────────────
+    const token = localStorage.getItem('access_token');
+    const user  = JSON.parse(localStorage.getItem('user') || 'null');
+    if (token && user) {
+      document.getElementById('nav-guest').style.display = 'none';
+      const navUser = document.getElementById('nav-user');
+      navUser.classList.add('visible');
+      document.getElementById('nav-user-name').textContent = user.first_name || user.email;
+      document.getElementById('nav-avatar').textContent = (user.first_name || 'U')[0].toUpperCase();
+    }
+
+    async function logout() {
+      const refresh = localStorage.getItem('refresh_token');
+      try {
+        await fetch('http://127.0.0.1:8000/api/auth/logout/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+          },
+          body: JSON.stringify({ refresh })
+        });
+      } catch(e) {}
+      localStorage.clear();
+      window.location.reload();
+    }
+
+    // ─── Reveal on scroll ────────────────────────────────
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i % 3) * 0.1 + 's';
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(r => revealObserver.observe(r));
+
+    // ─── Smooth scroll for nav links ─────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

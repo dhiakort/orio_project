@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ORIO — Saisie des Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --indigo:#6366f1; --indigo-dark:#4f46e5; --indigo-light:#e0e7ff;
+      --blue:#38bdf8; --blue-dark:#0284c7;
+      --green:#34d399; --green-dark:#059669; --green-light:#d1fae5;
+      --yellow:#fbbf24; --yellow-light:#fef3c7;
+      --orange:#fb923c; --red:#f87171; --red-light:#fee2e2;
+      --purple:#a78bfa;
+      --t1:#6366f1; --t1-light:#e0e7ff;
+      --t2:#10b981; --t2-light:#d1fae5;
+      --t3:#f59e0b; --t3-light:#fef3c7;
+      --white:#fff; --bg:#f8faff; --text:#1e293b; --text-soft:#64748b; --border:#e2e8f0;
+      --radius:20px; --radius-sm:12px;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+   .navbar {
+      position:sticky; top:0; z-index:100; height:64px;
+      background:rgba(255,255,255,.94); backdrop-filter:blur(18px);
+      border-bottom:1.5px solid rgba(99,102,241,.08);
+      display:flex; align-items:center; padding:0 32px; gap:14px;
+      box-shadow:0 2px 14px rgba(99,102,241,.07);
+    }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .nav-logo-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--indigo),var(--blue)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .nav-logo-txt { font-family:'Baloo 2',cursive; font-size:20px; font-weight:900; background:linear-gradient(135deg,var(--indigo),var(--blue-dark)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .nav-sep { width:1px; height:28px; background:var(--border); }
+    .nav-page { font-size:14px; font-weight:700; color:var(--text-soft); }
+    .nav-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+
+    /* Sprint steps */
+    .steps { display:flex; align-items:center; }
+    .step { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:var(--text-soft); }
+    .step-n { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; background:var(--border); color:var(--text-soft); flex-shrink:0; }
+    .step.done .step-n  { background:var(--green); color:white; }
+    .step.active .step-n { background:var(--indigo); color:white; }
+    .step.active { color:var(--indigo); }
+    .step.done   { color:var(--green-dark); }
+    .step-arr { color:var(--border); margin:0 8px; font-size:13px; }
+
+    .nav-pill { display:flex; align-items:center; gap:7px; background:var(--indigo-light); border-radius:99px; padding:5px 12px; }
+    .nav-av { width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,var(--indigo),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:white; }
+    .nav-name { font-size:13px; font-weight:700; color:var(--indigo-dark); }
+    .btn-back { display:flex; align-items:center; gap:5px; font-size:13px; font-weight:700; color:var(--text-soft); background:none; border:1.5px solid var(--border); border-radius:8px; padding:5px 12px; cursor:pointer; text-decoration:none; transition:color .2s,border-color .2s; }
+    .btn-back:hover { color:var(--indigo); border-color:var(--indigo); }
+
+    /* ══ LAYOUT ══ */
+    .wrap { max-width:1140px; margin:0 auto; padding:32px 24px 80px; display:grid; grid-template-columns:1fr 300px; gap:24px; align-items:start; }
+    .page-head { grid-column:1/-1; margin-bottom:4px; }
+    .breadcrumb { font-size:12px; color:var(--text-soft); margin-bottom:6px; }
+    .breadcrumb b { color:var(--indigo); }
+    .page-title { font-family:'Baloo 2',cursive; font-size:26px; font-weight:900; }
+    .page-sub { font-size:14px; color:var(--text-soft); margin-top:4px; }
+
+    /* ══ TRIMESTRE TABS ══ */
+    .trim-nav {
+      display:flex; gap:0; border-radius:16px; overflow:hidden;
+      border:2px solid var(--border); background:white;
+      margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .trim-tab {
+      flex:1; padding:0; border:none; background:none; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+      color:var(--text-soft); transition:background .2s,color .2s;
+      position:relative; overflow:hidden;
+    }
+    .trim-tab-inner {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:14px 10px; position:relative; z-index:1;
+    }
+    .trim-tab-num { font-family:'Baloo 2',cursive; font-size:18px; font-weight:900; line-height:1; }
+    .trim-tab-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+    .trim-tab-status { font-size:10px; font-weight:600; margin-top:1px; opacity:.75; }
+    .trim-tab-sep { width:1px; background:var(--border); align-self:stretch; margin:8px 0; }
+
+    /* Active states per trimestre */
+    .trim-tab[data-t="1"].active { background:linear-gradient(135deg,var(--t1),#818cf8); color:white; }
+    .trim-tab[data-t="2"].active { background:linear-gradient(135deg,var(--t2),#34d399); color:white; }
+    .trim-tab[data-t="3"].active { background:linear-gradient(135deg,var(--t3),var(--orange)); color:white; }
+    .trim-tab.done::after {
+      content:'✓'; position:absolute; top:8px; right:10px;
+      width:16px; height:16px; border-radius:50%;
+      background:var(--green); color:white;
+      font-size:9px; display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+    }
+
+    /* ══ SECTION BANNER ══ */
+    .sec-banner {
+      display:flex; align-items:center; gap:14px;
+      padding:12px 18px; border-radius:14px; margin-bottom:18px;
+      border:2px solid transparent;
+    }
+    .sb-emoji { font-size:26px; }
+    .sb-name  { font-family:'Baloo 2',cursive; font-size:15px; font-weight:800; }
+    .sb-sub   { font-size:11px; opacity:.8; margin-top:1px; }
+    .sb-change { margin-left:auto; font-size:11px; font-weight:700; background:rgba(255,255,255,.65); border:1.5px solid rgba(255,255,255,.85); border-radius:7px; padding:4px 10px; cursor:pointer; text-decoration:none; color:inherit; white-space:nowrap; }
+
+    /* ══ FORM CARD ══ */
+    .form-card { background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 20px rgba(0,0,0,.05); overflow:hidden; }
+    .fc-head { padding:18px 24px 16px; border-bottom:1.5px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    .fc-title { font-family:'Baloo 2',cursive; font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px; }
+    .fc-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .fc-count { font-size:13px; color:var(--text-soft); font-weight:700; }
+    .fc-body  { padding:20px 24px; }
+    .fc-foot  { padding:14px 24px 22px; border-top:1.5px solid var(--border); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    /* Trimestre accent */
+    .form-card[data-active="1"] .fc-head { border-bottom-color:rgba(99,102,241,.15); }
+    .form-card[data-active="2"] .fc-head { border-bottom-color:rgba(16,185,129,.15); }
+    .form-card[data-active="3"] .fc-head { border-bottom-color:rgba(245,158,11,.15); }
+    .form-card[data-active="1"] .fc-badge { background:var(--t1-light); color:var(--t1); }
+    .form-card[data-active="2"] .fc-badge { background:var(--t2-light); color:var(--t2); }
+    .form-card[data-active="3"] .fc-badge { background:var(--t3-light); color:#92400e; }
+
+    /* ══ MATIÈRE SECTIONS ══ */
+    .mat-sec { margin-bottom:20px; }
+    .mat-sec:last-child { margin-bottom:0; }
+    .mat-sec-title { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; color:var(--text-soft); margin-bottom:12px; }
+    .mat-line { flex:1; height:1px; background:var(--border); }
+    .tag-main { background:var(--red-light); color:#b91c1c; font-size:10px; font-weight:800; padding:2px 9px; border-radius:99px; }
+    .tag-sec  { background:var(--bg); border:1.5px solid var(--border); font-size:10px; font-weight:700; padding:2px 9px; border-radius:99px; color:var(--text-soft); }
+
+    /* Note grid */
+    .note-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .note-row {
+      display:flex; align-items:center;
+      background:var(--bg); border-radius:var(--radius-sm);
+      padding:9px 12px; border:2px solid transparent;
+      transition:border-color .2s, background .2s, transform .15s; cursor:text; position:relative;
+    }
+    .note-row:focus-within { background:white; transform:translateY(-1px); box-shadow:0 4px 12px rgba(99,102,241,.10); }
+    [data-active="1"] .note-row:focus-within { border-color:var(--t1); }
+    [data-active="2"] .note-row:focus-within { border-color:var(--t2); }
+    [data-active="3"] .note-row:focus-within { border-color:var(--t3); }
+    .n-emoji { font-size:16px; margin-right:7px; flex-shrink:0; }
+    .n-info  { flex:1; }
+    .n-name  { font-size:12px; font-weight:700; color:var(--text); display:block; line-height:1.2; }
+    .n-coeff { font-size:9px; font-weight:800; background:var(--indigo-light); color:var(--indigo); padding:1px 5px; border-radius:4px; margin-left:3px; }
+    .n-coeff-sec { font-size:9px; font-weight:800; background:#f1f5f9; color:var(--text-soft); padding:1px 5px; border-radius:4px; margin-left:3px; }
+    .n-hot  { font-size:9px; font-weight:800; background:var(--red-light); color:#b91c1c; padding:1px 5px; border-radius:4px; margin-left:3px; }
+    .n-inp-wrap { display:flex; align-items:center; gap:3px; }
+    .n-inp {
+      width:50px; border:none; outline:none;
+      background:white; border-radius:8px; padding:5px 5px;
+      font-size:14px; font-weight:800; font-family:'Baloo 2',cursive;
+      color:var(--text); text-align:center; border:1.5px solid var(--border);
+      transition:border-color .2s, color .2s;
+    }
+    .n-inp:focus { border-color:var(--indigo); }
+    .n-inp.ok   { color:var(--green-dark); border-color:var(--green); }
+    .n-inp.warn { color:#d97706; border-color:var(--yellow); }
+    .n-inp.bad  { color:#dc2626; border-color:var(--red); }
+    .n-slash    { font-size:10px; color:var(--text-soft); font-weight:700; }
+    .n-dot { width:6px; height:6px; border-radius:50%; position:absolute; top:8px; right:8px; background:var(--border); transition:background .3s; }
+    .n-dot.ok   { background:var(--green); }
+    .n-dot.warn { background:var(--yellow); }
+    .n-dot.bad  { background:var(--red); }
+
+    /* ══ BUTTONS ══ */
+    .btn-save {
+      flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+      color:white; font-family:'Baloo 2',cursive; font-size:15px; font-weight:800;
+      border:none; border-radius:12px; padding:12px 20px; cursor:pointer;
+      transition:transform .2s,box-shadow .2s,opacity .2s; position:relative; overflow:hidden;
+    }
+    [data-active="1"] .btn-save { background:linear-gradient(135deg,var(--t1),#818cf8); box-shadow:0 4px 14px rgba(99,102,241,.28); }
+    [data-active="2"] .btn-save { background:linear-gradient(135deg,var(--t2),#34d399); box-shadow:0 4px 14px rgba(16,185,129,.28); }
+    [data-active="3"] .btn-save { background:linear-gradient(135deg,var(--t3),var(--orange)); box-shadow:0 4px 14px rgba(245,158,11,.28); }
+    .btn-save:hover:not(:disabled) { transform:translateY(-2px); }
+    .btn-save:disabled { opacity:.65; cursor:not-allowed; }
+
+    .btn-nav {
+      display:flex; align-items:center; gap:6px;
+      background:none; border:2px solid var(--border); border-radius:12px;
+      padding:12px 16px; font-size:13px; font-weight:700;
+      color:var(--text-soft); cursor:pointer; transition:border-color .2s,color .2s;
+      text-decoration:none;
+    }
+    .btn-nav:hover:not(:disabled) { border-color:var(--indigo); color:var(--indigo); }
+    .btn-nav:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-reset { background:none; border:2px solid var(--border); border-radius:12px; padding:12px 14px; font-size:13px; font-weight:700; color:var(--text-soft); cursor:pointer; transition:border-color .2s,color .2s; }
+    .btn-reset:hover { border-color:var(--red); color:var(--red); }
+
+    .spinner { display:inline-block; width:15px; height:15px; border:2.5px solid rgba(255,255,255,.4); border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:4px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ══ TOAST ══ */
+    .toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:white; font-size:14px; font-weight:700; padding:12px 22px; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.18); transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s; opacity:0; z-index:9999; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+    .toast.ok  { background:linear-gradient(135deg,#059669,#34d399); }
+    .toast.err { background:linear-gradient(135deg,#dc2626,#f87171); }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar { display:flex; flex-direction:column; gap:16px; position:sticky; top:80px; }
+
+    /* Mini trimestre cards */
+    .tri-cards { display:flex; flex-direction:column; gap:10px; }
+    .tri-card {
+      border-radius:16px; padding:14px 16px; border:2px solid var(--border);
+      background:white; transition:border-color .3s, background .3s;
+    }
+    .tri-card.active-t1 { border-color:var(--t1); background:var(--t1-light); }
+    .tri-card.active-t2 { border-color:var(--t2); background:var(--t2-light); }
+    .tri-card.active-t3 { border-color:var(--t3); background:var(--t3-light); }
+    .tri-card-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .tri-card-name { font-family:'Baloo 2',cursive; font-size:13px; font-weight:800; }
+    .tri-card-avg  { font-family:'Baloo 2',cursive; font-size:16px; font-weight:900; }
+    .tri-bar-bg { height:5px; border-radius:99px; background:rgba(0,0,0,.08); overflow:hidden; }
+    .tri-bar-fill { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.16,1,.3,1); width:0%; }
+    .t1-bar { background:linear-gradient(90deg,var(--t1),#818cf8); }
+    .t2-bar { background:linear-gradient(90deg,var(--t2),#34d399); }
+    .t3-bar { background:linear-gradient(90deg,var(--t3),var(--orange)); }
+    .tri-card-status { font-size:10px; font-weight:700; margin-top:5px; opacity:.75; }
+
+    /* Annuel card */
+    .avg-annual {
+      background:linear-gradient(135deg,var(--indigo),var(--blue-dark));
+      border-radius:20px; padding:20px 18px; color:white; text-align:center;
+      box-shadow:0 8px 28px rgba(99,102,241,.26); position:relative; overflow:hidden;
+    }
+    .avg-annual::before { content:''; position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,.08); }
+    .aa-lbl { font-size:10px; font-weight:800; opacity:.8; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
+    .aa-val { font-family:'Baloo 2',cursive; font-size:44px; font-weight:900; line-height:1; }
+    .aa-den { font-size:14px; opacity:.6; margin-left:2px; }
+    .aa-niv { display:inline-block; background:rgba(255,255,255,.2); border-radius:99px; padding:3px 12px; font-size:11px; font-weight:800; margin-top:10px; }
+    .aa-bar-bg { height:5px; border-radius:99px; background:rgba(255,255,255,.2); margin-top:10px; overflow:hidden; }
+    .aa-bar-fill { height:100%; border-radius:99px; background:rgba(255,255,255,.85); transition:width .6s cubic-bezier(.16,1,.3,1); width:0%; }
+
+    /* Side cards */
+    .sc { background:white; border-radius:18px; padding:16px 18px; border:1.5px solid var(--border); box-shadow:0 2px 10px rgba(0,0,0,.04); }
+    .sc-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-soft); margin-bottom:10px; }
+    .pf-chips { display:flex; flex-wrap:wrap; gap:5px; min-height:20px; }
+    .pf-chip { padding:3px 9px; border-radius:99px; font-size:10px; font-weight:700; animation:pop .3s ease; }
+    @keyframes pop { from{transform:scale(.7);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .pf-chip.g { background:var(--green-light); color:var(--green-dark); }
+    .pf-chip.b { background:var(--red-light); color:#dc2626; }
+    .pf-empty { font-size:11px; color:var(--text-soft); font-style:italic; }
+
+    .dom-row { margin-bottom:10px; }
+    .dom-row:last-child { margin-bottom:0; }
+    .dom-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+    .dom-name { font-size:12px; font-weight:700; }
+    .dom-score { font-family:'Baloo 2',cursive; font-size:12px; font-weight:800; }
+    .dom-bg { height:5px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .dom-fill { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.16,1,.3,1); width:0%; }
+
+    /* Next card */
+    .next-card { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:2px solid #bbf7d0; border-radius:16px; padding:16px 18px; }
+    .next-title { font-family:'Baloo 2',cursive; font-size:14px; font-weight:800; color:#065f46; margin-bottom:4px; }
+    .next-desc { font-size:12px; color:#047857; line-height:1.5; margin-bottom:10px; }
+    .btn-next { display:flex; align-items:center; justify-content:center; gap:5px; background:linear-gradient(135deg,var(--green-dark),var(--green)); color:white; font-family:'Baloo 2',cursive; font-size:13px; font-weight:800; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; text-decoration:none; box-shadow:0 4px 12px rgba(5,150,105,.26); transition:transform .2s,box-shadow .2s; opacity:.4; pointer-events:none; }
+    .btn-next.on { opacity:1; pointer-events:auto; }
+    .btn-next.on:hover { transform:translateY(-2px); }
+
+    /* Progress dots */
+    .trim-progress { display:flex; align-items:center; gap:6px; margin-bottom:16px; }
+    .tp-dot { width:10px; height:10px; border-radius:50%; background:var(--border); transition:background .3s,transform .3s; }
+    .tp-dot.done   { background:var(--green); }
+    .tp-dot.active-1 { background:var(--t1); transform:scale(1.4); }
+    .tp-dot.active-2 { background:var(--t2); transform:scale(1.4); }
+    .tp-dot.active-3 { background:var(--t3); transform:scale(1.4); }
+    .tp-line { flex:1; height:2px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .tp-line-fill { height:100%; border-radius:99px; transition:width .5s ease; width:0%; }
+
+    @media(max-width:900px){ .wrap{grid-template-columns:1fr;} .sidebar{display:grid;grid-template-columns:1fr 1fr;} .avg-annual{grid-column:1/-1;} .tri-cards{grid-column:1/-1; flex-direction:row;} .tri-card{flex:1;} }
+    @media(max-width:600px){ .navbar{padding:0 16px;} .wrap{padding:16px 14px 60px;} .note-grid{grid-template-columns:1fr;} .sidebar{grid-template-columns:1fr;} .tri-cards{flex-direction:column;} }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">🎯</div>
+    <span class="nav-logo-txt">ORIO</span>
+  </a>
+  <div class="nav-sep"></div>
+  <span class="nav-page">Saisie des notes</span>
+  <div class="nav-right">
+    <div class="steps">
+      <div class="step done"><div class="step-n">✓</div><span>Inscription</span></div>
+      <div class="step-arr">›</div>
+      <div class="step active"><div class="step-n">2</div><span>Notes</span></div>
+      <div class="step-arr">›</div>
+      <div class="step"><div class="step-n">3</div><span>Big Five</span></div>
+      <div class="step-arr">›</div>
+      <div class="step"><div class="step-n">4</div><span>RIASEC</span></div>
+      <div class="step-arr">›</div>
+      <div class="step"><div class="step-n">5</div><span>Compétences</span></div>
+      <div class="step-arr">›</div>
+      <div class="step"><div class="step-n">6</div><span>Résultats</span></div>
+    </div>
+    <div class="nav-pill">
+      <div class="nav-av" id="nav-av">?</div>
+      <span class="nav-name" id="nav-name">—</span>
+    </div>
+    
+    <a href="index.html" class="btn-back">← Accueil</a>
+    <button onclick="handleLogout()" style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:#dc2626;background:none;border:1.5px solid #fecaca;border-radius:8px;padding:5px 12px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+       Déconnexion
+    </button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-head">
+    <div class="breadcrumb">ORIO › <b>Étape 2 — Saisie des notes par trimestre</b></div>
+    <h1 class="page-title">📊 Tes moyennes scolaires</h1>
+    <p class="page-sub">Saisis tes notes pour chaque trimestre · La moyenne annuelle est calculée automatiquement</p>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div>
+    <!-- Trimestre tabs -->
+    <div class="trim-nav" id="trim-nav">
+      <button class="trim-tab active" data-t="1" onclick="switchTrimestre(1)">
+        <div class="trim-tab-inner">
+          <span class="trim-tab-num">T1</span>
+          <span class="trim-tab-label">1er Trimestre</span>
+          <span class="trim-tab-status" id="tstatus-1">Non rempli</span>
+        </div>
+      </button>
+      <div class="trim-tab-sep"></div>
+      <button class="trim-tab" data-t="2" onclick="switchTrimestre(2)">
+        <div class="trim-tab-inner">
+          <span class="trim-tab-num">T2</span>
+          <span class="trim-tab-label">2ème Trimestre</span>
+          <span class="trim-tab-status" id="tstatus-2">Non rempli</span>
+        </div>
+      </button>
+      <div class="trim-tab-sep"></div>
+      <button class="trim-tab" data-t="3" onclick="switchTrimestre(3)">
+        <div class="trim-tab-inner">
+          <span class="trim-tab-num">T3</span>
+          <span class="trim-tab-label">3ème Trimestre</span>
+          <span class="trim-tab-status" id="tstatus-3">Non rempli</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="trim-progress">
+      <div class="tp-dot active-1" id="tp1"></div>
+      <div class="tp-line"><div class="tp-line-fill" id="tl12" style="background:var(--green)"></div></div>
+      <div class="tp-dot" id="tp2"></div>
+      <div class="tp-line"><div class="tp-line-fill" id="tl23" style="background:var(--green)"></div></div>
+      <div class="tp-dot" id="tp3"></div>
+    </div>
+
+    <!-- Form card -->
+    <div class="form-card" id="form-card" data-active="1">
+      <div class="fc-head">
+        <div class="fc-title">
+          <span id="fc-trim-emoji">📝</span>
+          <span id="fc-trim-title">1er Trimestre</span>
+          <span class="fc-badge" id="fc-badge">—</span>
+        </div>
+        <span class="fc-count" id="fc-count">0 matières saisies</span>
+      </div>
+
+      <div class="fc-body">
+        <!-- Section banner -->
+        <div class="sec-banner" id="sec-banner">
+          <span class="sb-emoji" id="sb-emoji">📚</span>
+          <div>
+            <div class="sb-name" id="sb-name">Chargement…</div>
+            <div class="sb-sub"  id="sb-sub"></div>
+          </div>
+          <a href="register.html" class="sb-change">✏️ Modifier ma section</a>
+        </div>
+        <div id="form-area"></div>
+      </div>
+
+      <div class="fc-foot">
+        <button class="btn-reset" onclick="resetTrimestre()">Réinitialiser T<span id="reset-t">1</span></button>
+        <button class="btn-nav" id="btn-prev" onclick="prevTrimestre()" disabled>← Précédent</button>
+        <button class="btn-save" id="btn-save" onclick="saveTrimestre()">
+          Sauvegarder T<span id="save-t">1</span>
+        </button>
+        <button class="btn-nav" id="btn-next-trim" onclick="nextTrimestre()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+
+    <!-- Moyenne annuelle -->
+    <div class="avg-annual">
+      <div class="aa-lbl">📊 Moyenne annuelle</div>
+      <div>
+        <span class="aa-val" id="aa-val">—</span>
+        <span class="aa-den">/20</span>
+      </div>
+      <div class="aa-niv" id="aa-niv">En attente</div>
+      <div class="aa-bar-bg"><div class="aa-bar-fill" id="aa-bar"></div></div>
+    </div>
+
+    <!-- 3 trimestres mini-cards -->
+    <div class="tri-cards">
+      <div class="tri-card active-t1" id="tc1">
+        <div class="tri-card-hd">
+          <span class="tri-card-name" style="color:var(--t1)">T1</span>
+          <span class="tri-card-avg" id="tc1-avg" style="color:var(--t1)">—</span>
+        </div>
+        <div class="tri-bar-bg"><div class="tri-bar-fill t1-bar" id="tc1-bar"></div></div>
+        <div class="tri-card-status" id="tc1-status">Non rempli</div>
+      </div>
+      <div class="tri-card" id="tc2">
+        <div class="tri-card-hd">
+          <span class="tri-card-name" style="color:var(--t2)">T2</span>
+          <span class="tri-card-avg" id="tc2-avg" style="color:var(--t2)">—</span>
+        </div>
+        <div class="tri-bar-bg"><div class="tri-bar-fill t2-bar" id="tc2-bar"></div></div>
+        <div class="tri-card-status" id="tc2-status">Non rempli</div>
+      </div>
+      <div class="tri-card" id="tc3">
+        <div class="tri-card-hd">
+          <span class="tri-card-name" style="color:var(--t3)">T3</span>
+          <span class="tri-card-avg" id="tc3-avg" style="color:var(--t3)">—</span>
+        </div>
+        <div class="tri-bar-bg"><div class="tri-bar-fill t3-bar" id="tc3-bar"></div></div>
+        <div class="tri-card-status" id="tc3-status">Non rempli</div>
+      </div>
+    </div>
+
+    <!-- Points forts annuels -->
+    <div class="sc">
+      <div class="sc-title">💪 Points forts ≥ 14 (annuel)</div>
+      <div class="pf-chips" id="chips-f"><span class="pf-empty">Aucun encore</span></div>
+    </div>
+
+    <!-- Points faibles annuels -->
+    <div class="sc">
+      <div class="sc-title">⚠️ À améliorer &lt; 10 (annuel)</div>
+      <div class="pf-chips" id="chips-w"><span class="pf-empty">Aucun pour l'instant</span></div>
+    </div>
+
+    <!-- Scores domaines -->
+    <div class="sc">
+      <div class="sc-title">🎯 Scores domaines (annuel)</div>
+      <div class="dom-row">
+        <div class="dom-hd"><span class="dom-name">💻 Informatique</span><span class="dom-score" id="ds-info" style="color:var(--indigo)">—</span></div>
+        <div class="dom-bg"><div class="dom-fill" id="db-info" style="background:linear-gradient(90deg,var(--indigo),var(--purple))"></div></div>
+      </div>
+      <div class="dom-row">
+        <div class="dom-hd"><span class="dom-name">🔬 Sciences</span><span class="dom-score" id="ds-sci" style="color:var(--green-dark)">—</span></div>
+        <div class="dom-bg"><div class="dom-fill" id="db-sci" style="background:linear-gradient(90deg,var(--green),#059669)"></div></div>
+      </div>
+      <div class="dom-row">
+        <div class="dom-hd"><span class="dom-name">📚 Lettres</span><span class="dom-score" id="ds-lit" style="color:var(--orange)">—</span></div>
+        <div class="dom-bg"><div class="dom-fill" id="db-lit" style="background:linear-gradient(90deg,var(--yellow),var(--orange))"></div></div>
+      </div>
+      <div class="dom-row">
+        <div class="dom-hd"><span class="dom-name">💼 Économie</span><span class="dom-score" id="ds-eco" style="color:#7c3aed">—</span></div>
+        <div class="dom-bg"><div class="dom-fill" id="db-eco" style="background:linear-gradient(90deg,var(--purple),#7c3aed)"></div></div>
+      </div>
+    </div>
+
+    <!-- Next -->
+    <div class="next-card">
+      <div class="next-title">🧠 Étape suivante</div>
+      <div class="next-desc">Sauvegarde tes notes pour déverrouiller les 3 tests psychométriques !</div>
+      <a href="tests.html" class="btn-next" id="btn-next">Passer aux tests 🚀</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  SECTIONS CONFIG
+// ══════════════════════════════════════════════════════════════════════
+
+const SECTIONS = {
+
+  // ── 1ère secondaire — Tronc commun ───────────────────────────────
+  tronc_commun: {
+    emoji:'🏛️',
+    name:'1ère secondaire — Tronc commun',
+    sub:'Programme identique pour tous les élèves',
+    color:'#6366f1',
+    light:'#e0e7ff',
+
+    matieres:{
+      mathematiques:      {coeff:3, type:'principale', emoji:'📐', label:'Mathématiques'},
+      sciences_naturelles:{coeff:1.5, type:'principale', emoji:'🌿', label:'Sciences naturelles'},
+      physique:           {coeff:2.5, type:'principale', emoji:'⚗️', label:'Physique'},
+      technologie:        {coeff:1, type:'principale', emoji:'🛠️', label:'Technologie'},
+      arabe:              {coeff:3, type:'principale', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:2.5, type:'principale', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:1.5, type:'principale', emoji:'🌍', label:'Anglais'},
+      histoire_geo:       {coeff:3, type:'secondaire', emoji:'🗺️', label:'Histoire-Géo'},
+      education_islamique:{coeff:1, type:'secondaire', emoji:'☪️', label:'Éd. islamique'},
+      education_civique:  {coeff:1, type:'secondaire', emoji:'🗳️', label:'Éd. civique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── 2ème secondaire — Scientifique ───────────────────────────────
+  scientifique: {
+    emoji:'🔬',
+    name:'2ème secondaire — Scientifique',
+    sub:'Formation scientifique orientée vers les mathématiques et les sciences',
+    color:'#10b981',
+    light:'#d1fae5',
+
+    matieres:{
+      mathematiques:      {coeff:4, type:'principale', emoji:'📐', label:'Mathématiques'},
+      physique:           {coeff:4, type:'principale', emoji:'⚗️', label:'Physique'},
+      sciences_naturelles:{coeff:2, type:'principale', emoji:'🌿', label:'Sciences naturelles'},
+      technologie:        {coeff:2, type:'secondaire', emoji:'⚙️', label:'Technologie'},
+      informatique:       {coeff:1, type:'principale', emoji:'💻', label:'Informatique'},
+      arabe:              {coeff:2, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:2, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:2, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      histoire_geo:       {coeff:1, type:'secondaire', emoji:'🗺️', label:'Histoire-Géo'},
+      education_civique:  {coeff:1, type:'secondaire', emoji:'🗳️', label:'Éd. civique'},
+      education_islamique:{coeff:1, type:'secondaire', emoji:'☪️', label:'Éd. islamique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── 2ème secondaire — Informatique ───────────────────────────────
+  informatique: {
+    emoji:'💻',
+    name:'2ème secondaire — Informatique',
+    sub:'Programme dédié à l’informatique et aux technologies numériques',
+    color:'#06b6d4',
+    light:'#cffafe',
+
+    matieres:{
+      mathematiques:      {coeff:4, type:'principale', emoji:'📐', label:'Mathématiques'},
+      physique:           {coeff:3, type:'principale', emoji:'⚗️', label:'Physique'},
+      technologie:        {coeff:2, type:'secondaire', emoji:'⚙️', label:'Technologie'},
+      informatique:       {coeff:3, type:'principale', emoji:'💻', label:'Informatique'},
+      arabe:              {coeff:2, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:2, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:2, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      histoire_geo:       {coeff:1, type:'secondaire', emoji:'🗺️', label:'Histoire-Géo'},
+      education_civique:  {coeff:1, type:'secondaire', emoji:'🗳️', label:'Éd. civique'},
+      education_islamique:{coeff:1, type:'secondaire', emoji:'☪️', label:'Éd. islamique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── 2ème secondaire — Économie & Gestion ─────────────────────────
+  economique: {
+    emoji:'💰',
+    name:'2ème secondaire — Économie & Gestion',
+    sub:'Introduction à l’économie, la gestion et l’analyse financière',
+    color:'#7c3aed',
+    light:'#ede9fe',
+
+    matieres:{
+      economie:           {coeff:3, type:'principale', emoji:'📈', label:'Économie'},
+      gestion:            {coeff:3, type:'principale', emoji:'📋', label:'Gestion'},
+      mathematiques:      {coeff:2.5, type:'principale', emoji:'📐', label:'Mathématiques'},
+      histoire_geo:       {coeff:3, type:'principale', emoji:'🗺️', label:'Histoire-Géo'},
+      arabe:              {coeff:2, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:2, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:2, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      informatique:       {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      education_islamique:{coeff:1, type:'secondaire', emoji:'☪️', label:'Éd. islamique'},
+      education_civique:  {coeff:1, type:'secondaire', emoji:'🗳️', label:'Éd. civique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── 2ème secondaire — Lettres ────────────────────────────────────
+  lettres_2: {
+    emoji:'📚',
+    name:'2ème secondaire — Lettres',
+    sub:'Parcours centré sur les langues et les sciences humaines',
+    color:'#f472b6',
+    light:'#fce7f3',
+
+    matieres:{
+      arabe:              {coeff:4, type:'principale', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:4, type:'principale', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:3, type:'principale', emoji:'🌍', label:'Anglais'},
+      histoire_geo:       {coeff:3, type:'principale', emoji:'🗺️', label:'Histoire-Géo'},
+      education_islamique:{coeff:1, type:'principale', emoji:'☪️', label:'Éd. islamique'},
+      education_civique:  {coeff:1, type:'secondaire', emoji:'🗳️', label:'Éd. civique'},
+      mathematiques:      {coeff:1, type:'secondaire', emoji:'📐', label:'Mathématiques'},
+      sciences_naturelles:{coeff:1, type:'secondaire', emoji:'🌿', label:'Sciences naturelles'},
+      informatique:       {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Mathématiques ──────────────────────────────────────────
+  mathematiques: {
+    emoji:'🔢',
+    name:'Bac — Mathématiques',
+    sub:'Section spécialisée en mathématiques avancées et sciences physiques',
+    color:'#4f46e5',
+    light:'#e0e7ff',
+
+    matieres:{
+      mathematiques:      {coeff:4, type:'principale', emoji:'📐', label:'Mathématiques', hot:true},
+      physique:           {coeff:4, type:'principale', emoji:'⚗️', label:'Physique', hot:true},
+      informatique:       {coeff:1.5, type:'principale', emoji:'💻', label:'Informatique'},
+      sciences_naturelles:{coeff:1.5, type:'principale', emoji:'🌿', label:'Sciences naturelles'},
+      philosophie:        {coeff:1, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+      arabe:              {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:1, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:1, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Sciences expérimentales ────────────────────────────────
+  sciences_exp: {
+    emoji:'🧪',
+    name:'Bac — Sciences expérimentales',
+    sub:'Formation axée sur les sciences naturelles et expérimentales',
+    color:'#10b981',
+    light:'#d1fae5',
+
+    matieres:{
+      sciences_naturelles:{coeff:4, type:'principale', emoji:'🌿', label:'Sciences naturelles', hot:true},
+      physique:           {coeff:4, type:'principale', emoji:'⚗️', label:'Physique', hot:true},
+      mathematiques:      {coeff:3, type:'principale', emoji:'📐', label:'Mathématiques'},
+      philosophie:        {coeff:1, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+      arabe:              {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      francais:           {coeff:1, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:1, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      informatique:       {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Sciences techniques ────────────────────────────────────
+  sciences_tech: {
+    emoji:'⚙️',
+    name:'Bac — Sciences techniques',
+    sub:'Formation orientée vers la technologie et les systèmes techniques',
+    color:'#f59e0b',
+    light:'#fef3c7',
+
+    matieres:{
+      technologie:        {coeff:4, type:'principale', emoji:'⚙️', label:'Technologie', hot:true},
+      mathematiques:      {coeff:4, type:'principale', emoji:'📐', label:'Mathématiques'},
+      physique:           {coeff:4, type:'principale', emoji:'⚗️', label:'Physique'},
+      informatique:       {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      francais:           {coeff:1, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:1, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      arabe:              {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      philosophie:        {coeff:1, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Sciences de l'informatique ─────────────────────────────
+  sciences_info: {
+    emoji:'💻',
+    name:"Bac — Sciences de l'informatique",
+    sub:'Section spécialisée en programmation et technologies numériques',
+    color:'#6366f1',
+    light:'#e0e7ff',
+
+    matieres:{
+      informatique_tic:{coeff:3,type:'principale',emoji:'💻',label:'Informatique et TIC',hot:true},
+      algorithme_programmation:{coeff:3,type:'principale',emoji:'🧠',label:'Algorithme et programmation',hot:true},
+      sti:{coeff:3,type:'principale',emoji:'⚙️',label:'STI',hot:true},
+      mathematiques:{coeff:3, type:'principale', emoji:'📐', label:'Mathématiques'},
+      physique:     {coeff:2, type:'principale', emoji:'⚗️', label:'Physique'},
+      francais:     {coeff:1, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:      {coeff:1, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      arabe:        {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      philosophie:  {coeff:1, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+      sport:        {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Économie & Gestion ─────────────────────────────────────
+  eco_gestion: {
+    emoji:'📈',
+    name:'Bac — Économie & Gestion',
+    sub:'Formation axée sur l’économie, la gestion et les statistiques',
+    color:'#7c3aed',
+    light:'#ede9fe',
+
+    matieres:{
+      economie:     {coeff:4, type:'principale', emoji:'📈', label:'Économie', hot:true},
+      gestion:      {coeff:4, type:'principale', emoji:'📋', label:'Gestion', hot:true},
+      mathematiques:{coeff:2, type:'principale', emoji:'📐', label:'Mathématiques'},
+      histoire_geo: {coeff:2, type:'principale', emoji:'🗺️', label:'Histoire-Géo'},
+      francais:     {coeff:1, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:      {coeff:1, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      arabe:        {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      informatique: {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      philosophie:  {coeff:1, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+      sport:        {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Lettres ────────────────────────────────────────────────
+  lettres_bac: {
+    emoji:'📖',
+    name:'Bac — Lettres',
+    sub:'Parcours orienté vers les langues, la philosophie et les sciences humaines',
+    color:'#f472b6',
+    light:'#fce7f3',
+
+    matieres:{
+      philosophie:        {coeff:4, type:'principale', emoji:'🧩', label:'Philosophie', hot:true},
+      arabe:              {coeff:4, type:'principale', emoji:'🌙', label:'Arabe', hot:true},
+      histoire_geo:       {coeff:3, type:'principale', emoji:'🗺️', label:'Histoire-Géo'},
+      francais:           {coeff:2, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:            {coeff:2, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      education_islamique:{coeff:1, type:'secondaire', emoji:'☪️', label:'Éd. islamique'},
+      informatique:       {coeff:1, type:'secondaire', emoji:'💻', label:'Informatique'},
+      sport:              {coeff:1, type:'secondaire', emoji:'⚽', label:'Sport'},
+    },
+  },
+
+  // ── Bac — Sport ──────────────────────────────────────────────────
+  sport_bac: {emoji:'⚽',name:'Bac — Sport',sub:'Section dédiée aux sciences du sport et à la pratique physique',color:'#fb923c',light:'#ffedd5',
+
+    matieres:{
+      sport_pratique:{coeff:2.5,type:'principale', emoji:'🏃',label:'Sport pratique',hot:true},
+      sport_theorique:{coeff:0.5,type:'principale',emoji:'📘', label:'Sport théorique'},
+      sciences:{coeff:3,type:'principale',emoji:'🧪',label:'Sciences'},
+      mathematiques:{coeff:1, type:'secondaire', emoji:'📐', label:'Mathématiques'},
+      physique:     {coeff:1, type:'secondaire', emoji:'⚗️', label:'Physique'},
+      francais:     {coeff:1.5, type:'secondaire', emoji:'🇫🇷', label:'Français'},
+      anglais:      {coeff:1.5, type:'secondaire', emoji:'🌍', label:'Anglais'},
+      arabe:        {coeff:1, type:'secondaire', emoji:'🌙', label:'Arabe'},
+      philosophie:  {coeff:1.5, type:'secondaire', emoji:'🧩', label:'Philosophie'},
+    },
+  },
+
+};
+
+const NIV_DEFAULT = {
+  '1ere':'tronc_commun', '2eme_s':'scientifique',
+  '3eme_s':'mathematiques', '4eme_s':'mathematiques',
+};
+
+const TRIM_CONFIG = {
+  1: { emoji:'📝', label:'1er Trimestre',  color:'var(--t1)', light:'var(--t1-light)' },
+  2: { emoji:'📋', label:'2ème Trimestre', color:'var(--t2)', light:'var(--t2-light)' },
+  3: { emoji:'📌', label:'3ème Trimestre', color:'var(--t3)', light:'var(--t3-light)' },
+};
+
+// ══════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════
+const API   = 'http://127.0.0.1:8000/api';
+const token = localStorage.getItem('access_token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+
+// notes[t][matiere] = float
+const notes = { 1:{}, 2:{}, 3:{} };
+// saved[t] = true/false
+const saved = { 1:false, 2:false, 3:false };
+
+let currentT  = 1;
+let curSec    = null;
+
+if (!token) { window.location.href = 'login.html'; }
+if (user) {
+  document.getElementById('nav-name').textContent = user.first_name || user.email;
+  document.getElementById('nav-av').textContent   = (user.first_name || 'U')[0].toUpperCase();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  BUILD FORM
+// ══════════════════════════════════════════════════════════════════════
+function buildForm(secKey) {
+  const sec = SECTIONS[secKey] || SECTIONS['tronc_commun'];
+  curSec = { key: secKey, ...sec };
+
+  // Banner
+  const banner = document.getElementById('sec-banner');
+  banner.style.background  = sec.light;
+  banner.style.borderColor = sec.color + '55';
+  banner.style.color       = sec.color;
+  document.getElementById('sb-emoji').textContent = sec.emoji;
+  document.getElementById('sb-name').textContent  = sec.name;
+  document.getElementById('sb-sub').textContent   = sec.sub;
+  document.getElementById('fc-badge').textContent = sec.name.split('—').pop().trim();
+
+  renderFormForTrimestre(currentT);
+}
+
+function renderFormForTrimestre(t) {
+  if (!curSec) return;
+  const sec = curSec;
+  const tc  = TRIM_CONFIG[t];
+
+  // Update form card accent
+  document.getElementById('form-card').dataset.active = t;
+  document.getElementById('fc-trim-emoji').textContent = tc.emoji;
+  document.getElementById('fc-trim-title').textContent = tc.label;
+  document.getElementById('reset-t').textContent = t;
+  document.getElementById('save-t').textContent  = t;
+
+  // Tabs
+  document.querySelectorAll('.trim-tab').forEach(tb => {
+    tb.classList.remove('active');
+    if (+tb.dataset.t === t) tb.classList.add('active');
+  });
+
+  // Prev / Next buttons
+  document.getElementById('btn-prev').disabled = (t === 1);
+  document.getElementById('btn-next-trim').disabled = (t === 3);
+  document.getElementById('btn-next-trim').textContent = t === 3 ? '' : 'Suivant →';
+  if (t === 3) document.getElementById('btn-next-trim').style.display = 'none';
+  else document.getElementById('btn-next-trim').style.display = '';
+
+  // Build matières
+  const principales = Object.entries(sec.matieres).filter(([,v]) => v.type === 'principale');
+  const secondaires = Object.entries(sec.matieres).filter(([,v]) => v.type === 'secondaire');
+  let html = '';
+  if (principales.length) {
+    html += `<div class="mat-sec">
+      <div class="mat-sec-title"><span>🔥 Matières principales</span><div class="mat-line"></div><span class="tag-main">coefficient élevé</span></div>
+      <div class="note-grid">${principales.map(([k,m]) => noteRow(k,m,t)).join('')}</div>
+    </div>`;
+  }
+  if (secondaires.length) {
+    html += `<div class="mat-sec">
+      <div class="mat-sec-title"><span>📎 Matières secondaires</span><div class="mat-line"></div><span class="tag-sec">coefficient faible</span></div>
+      <div class="note-grid">${secondaires.map(([k,m]) => noteRow(k,m,t)).join('')}</div>
+    </div>`;
+  }
+  document.getElementById('form-area').innerHTML = html;
+
+  // Restore saved values for this trimestre
+  Object.entries(notes[t]).forEach(([k, v]) => {
+    const inp = document.getElementById(`note-t${t}-${k}`);
+    if (inp) { inp.value = v; colorInp(inp, v); }
+  });
+
+  updateSidebar();
+}
+
+function noteRow(key, mat, t) {
+  const hotBadge   = mat.hot  ? `<span class="n-hot">⭐ clé</span>` : '';
+  const coeffBadge = mat.type === 'principale'
+    ? `<span class="n-coeff">×${mat.coeff}</span>`
+    : `<span class="n-coeff-sec">×${mat.coeff}</span>`;
+  return `
+    <div class="note-row" id="row-t${t}-${key}">
+      <div class="n-dot" id="dot-t${t}-${key}"></div>
+      <span class="n-emoji">${mat.emoji}</span>
+      <div class="n-info">
+        <span class="n-name">${mat.label}${hotBadge}${coeffBadge}</span>
+      </div>
+      <div class="n-inp-wrap">
+        <input class="n-inp" id="note-t${t}-${key}" type="number"
+               min="0" max="20" step="0.25" placeholder="—"
+               oninput="onNote(${t},'${key}',this)"/>
+        <span class="n-slash">/20</span>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  NOTE CHANGE
+// ══════════════════════════════════════════════════════════════════════
+function onNote(t, key, inp) {
+  let v = parseFloat(inp.value);
+  if (v > 20) { v = 20; inp.value = 20; }
+  if (v <  0) { v =  0; inp.value =  0; }
+  if (!isNaN(v) && inp.value !== '') {
+    notes[t][key] = v;
+    colorInp(inp, v);
+    colorDot(document.getElementById(`dot-t${t}-${key}`), v);
+  } else {
+    delete notes[t][key];
+    inp.className = 'n-inp';
+    const dot = document.getElementById(`dot-t${t}-${key}`);
+    if (dot) dot.className = 'n-dot';
+  }
+  updateSidebar();
+}
+
+function colorInp(inp, v) {
+  inp.classList.remove('ok','warn','bad');
+  inp.classList.add(v >= 14 ? 'ok' : v >= 10 ? 'warn' : 'bad');
+}
+function colorDot(dot, v) {
+  if (!dot) return;
+  dot.classList.remove('ok','warn','bad');
+  dot.classList.add(v >= 14 ? 'ok' : v >= 10 ? 'warn' : 'bad');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SIDEBAR UPDATE
+// ══════════════════════════════════════════════════════════════════════
+function updateSidebar() {
+  if (!curSec) return;
+  const mats = curSec.matieres;
+
+  // Per-trimestre mini-cards
+  const LABELS_MAP = {};
+  Object.entries(mats).forEach(([k,m]) => LABELS_MAP[k] = m.label);
+
+  for (let t = 1; t <= 3; t++) {
+    const tn = notes[t];
+    const keys = Object.keys(tn);
+
+    let avgPond = null;
+    if (keys.length > 0) {
+      let totPts = 0, totC = 0;
+      keys.forEach(k => {
+        const c = mats[k] ? mats[k].coeff : 1;
+        totPts += tn[k] * c;
+        totC   += c;
+      });
+      avgPond = totPts / totC;
+    }
+
+    const tc = document.getElementById(`tc${t}`);
+    document.getElementById(`tc${t}-avg`).textContent  = avgPond !== null ? avgPond.toFixed(2) : '—';
+    document.getElementById(`tc${t}-bar`).style.width  = avgPond !== null ? (avgPond / 20 * 100) + '%' : '0%';
+    document.getElementById(`tc${t}-status`).textContent = keys.length > 0
+      ? `${keys.length} matière${keys.length>1?'s':''} · moy. ${avgPond.toFixed(2)}`
+      : 'Non rempli';
+    document.getElementById(`tstatus-${t}`).textContent = keys.length > 0
+      ? `${keys.length} matière${keys.length>1?'s':''}`
+      : 'Non rempli';
+
+    // Done badge on tab
+    const tab = document.querySelector(`.trim-tab[data-t="${t}"]`);
+    if (saved[t]) tab.classList.add('done'); else tab.classList.remove('done');
+
+    // Active card highlight
+    tc.className = 'tri-card';
+    if (t === currentT) tc.classList.add(`active-t${t}`);
+
+    // Progress dots
+    const dot = document.getElementById(`tp${t}`);
+    dot.className = 'tp-dot';
+    if (saved[t]) dot.classList.add('done');
+    else if (t === currentT) dot.classList.add(`active-${t}`);
+
+    // Progress lines
+    if (t < 3) {
+      const line = document.getElementById(`tl${t}${t+1}`);
+      line.style.width = saved[t] ? '100%' : '0%';
+    }
+  }
+
+  // Current trimestre fc-count
+  const curKeys = Object.keys(notes[currentT]);
+  const totalMat = Object.keys(mats).length;
+  document.getElementById('fc-count').textContent = `${curKeys.length} / ${totalMat} matières saisies`;
+
+  // ── Annuel : moyenne des moyennes pondérées disponibles ──
+  const trims_avec_notes = [];
+  for (let t = 1; t <= 3; t++) {
+    const tn = notes[t];
+    const keys = Object.keys(tn);
+    if (keys.length === 0) continue;
+    let totPts = 0, totC = 0;
+    keys.forEach(k => {
+      const c = mats[k] ? mats[k].coeff : 1;
+      totPts += tn[k] * c;
+      totC   += c;
+    });
+    trims_avec_notes.push(totPts / totC);
+  }
+
+  if (trims_avec_notes.length > 0) {
+    const annuelle = trims_avec_notes.reduce((a,b) => a+b, 0) / trims_avec_notes.length;
+    document.getElementById('aa-val').textContent = annuelle.toFixed(2);
+    document.getElementById('aa-bar').style.width = (annuelle / 20 * 100) + '%';
+    let niv;
+    if (annuelle >= 16) niv = '🌟 Excellent';
+    else if (annuelle >= 13) niv = '✅ Bien';
+    else if (annuelle >= 10) niv = '📖 Passable';
+    else niv = '⚠️ Insuffisant';
+    document.getElementById('aa-niv').textContent = niv;
+  } else {
+    document.getElementById('aa-val').textContent = '—';
+    document.getElementById('aa-niv').textContent = 'En attente';
+    document.getElementById('aa-bar').style.width = '0%';
+  }
+
+  // ── Points forts/faibles annuels (moyenne par matière) ──
+  const moyMat = {};
+  Object.keys(mats).forEach(k => {
+    const vals = [1,2,3].map(t => notes[t][k]).filter(v => v !== undefined);
+    if (vals.length > 0) moyMat[k] = vals.reduce((a,b) => a+b, 0) / vals.length;
+  });
+
+  const forts   = Object.entries(moyMat).filter(([,v]) => v >= 14).map(([k]) => k);
+  const faibles = Object.entries(moyMat).filter(([,v]) => v <  10).map(([k]) => k);
+  const lbl = k => mats[k] ? mats[k].label : k;
+
+  document.getElementById('chips-f').innerHTML = forts.length
+    ? forts.map(k => `<span class="pf-chip g">✅ ${lbl(k)}</span>`).join('')
+    : '<span class="pf-empty">Aucun encore</span>';
+  document.getElementById('chips-w').innerHTML = faibles.length
+    ? faibles.map(k => `<span class="pf-chip b">⚠️ ${lbl(k)}</span>`).join('')
+    : '<span class="pf-empty">Aucun pour l\'instant</span>';
+
+  // ── Scores domaines annuels ──
+  function domScore(domMats) {
+    const items = domMats
+      .filter(k => moyMat[k] !== undefined)
+      .map(k => ({ n: moyMat[k], c: mats[k] ? mats[k].coeff : 1 }));
+    if (!items.length) return null;
+    const pts = items.reduce((a,i) => a + i.n * i.c, 0);
+    const cs  = items.reduce((a,i) => a + i.c, 0);
+    return pts / cs;
+  }
+  function setDom(sId, bId, domMats) {
+    const s = domScore(domMats);
+    document.getElementById(sId).textContent = s !== null ? s.toFixed(1) + '/20' : '—';
+    document.getElementById(bId).style.width = s !== null ? (s / 20 * 100) + '%' : '0%';
+  }
+  setDom('ds-info', 'db-info', ['mathematiques','physique','informatique']);
+  setDom('ds-sci',  'db-sci',  ['mathematiques','physique','sciences_naturelles']);
+  setDom('ds-lit',  'db-lit',  ['francais','arabe','anglais','philosophie','histoire_geo']);
+  setDom('ds-eco',  'db-eco',  ['mathematiques','economie','gestion','anglais','francais']);
+
+  // ── Bouton tests ──
+  const anySaved = saved[1] || saved[2] || saved[3];
+  document.getElementById('btn-go-tests').classList.toggle('on', anySaved);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════════════════
+function switchTrimestre(t) {
+  currentT = t;
+  renderFormForTrimestre(t);
+}
+function prevTrimestre() { if (currentT > 1) switchTrimestre(currentT - 1); }
+function nextTrimestre() { if (currentT < 3) switchTrimestre(currentT + 1); }
+
+// ══════════════════════════════════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════════════════════════════════
+async function saveTrimestre() {
+  const t    = currentT;
+  const tn   = notes[t];
+  const mats = curSec?.matieres || {};
+
+  const nPrinc = Object.keys(tn).filter(k => mats[k]?.type === 'principale').length;
+  if (nPrinc < 1) {
+    toast(`⚠️ Saisis au moins 1 matière principale pour T${t}`, 'err'); return;
+  }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Sauvegarde T${t}…`;
+
+  // Construire payload avec préfixe t{N}_
+  const payload = {
+    trimestre: t,
+    notes: { ...tn }
+  };
+  try {
+    const res  = await fetch(`${API}/notes/`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      saved[t] = true;
+      toast(`Trimestre ${t} sauvegardé !`, 'ok');
+      btn.innerHTML = `✅ T${t} sauvegardé !`;
+      btn.style.background = 'linear-gradient(135deg,#059669,#34d399)';
+
+      // Auto-avancer au trimestre suivant
+      setTimeout(() => {
+        btn.innerHTML = ` Sauvegarder T<span id="save-t">${t}</span>`;
+        btn.style.background = '';
+        btn.disabled = false;
+        if (t < 3) switchTrimestre(t + 1);
+        else updateSidebar();
+      }, 1400);
+      updateSidebar();
+    } else {
+      toast(' ' + Object.values(data).flat().join(' '), 'err');
+      btn.disabled = false;
+      btn.innerHTML = ` Sauvegarder T<span id="save-t">${t}</span>`;
+    }
+  } catch {
+    toast(' Erreur réseau', 'err');
+    btn.disabled = false;
+    btn.innerHTML = `Sauvegarder T<span id="save-t">${t}</span>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════════════════════════════════════
+function resetTrimestre() {
+  const t = currentT;
+  if (!confirm(`Réinitialiser les notes du Trimestre ${t} ?`)) return;
+  document.querySelectorAll(`[id^="note-t${t}-"]`).forEach(inp => { inp.value = ''; inp.className = 'n-inp'; });
+  document.querySelectorAll(`[id^="dot-t${t}-"]`).forEach(d => d.className = 'n-dot');
+  notes[t] = {};
+  updateSidebar();
+  toast(`🗑️ Trimestre ${t} réinitialisé`, 'ok');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  LOAD
+// ══════════════════════════════════════════════════════════════════════
+async function loadNotes() {
+  try {
+    const res = await fetch(`${API}/notes/`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // 1. Charger TOUTES les notes en mémoire (les 3 trimestres)
+    (data.trimestres || []).forEach(trim => {
+      const t = trim.numero;
+      trim.notes.forEach(n => {
+        notes[t][n.matiere] = n.valeur;
+        saved[t] = true;
+      });
+    });
+
+    // 2. Afficher uniquement le trimestre actuellement rendu dans le DOM
+    Object.entries(notes[currentT]).forEach(([k, v]) => {
+      const inp = document.getElementById(`note-t${currentT}-${k}`);
+      if (inp) {
+        inp.value = v;
+        colorInp(inp, v);
+        colorDot(document.getElementById(`dot-t${currentT}-${k}`), v);
+      }
+    });
+
+    updateSidebar();
+    if (saved[1] || saved[2] || saved[3]) toast('Notes chargées', 'ok');
+
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════════════
+let toastTmr;
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DÉCONNEXION
+// ═══════════════════════════════════════════════════════════════
+async function handleLogout() {
+  const refresh = localStorage.getItem('refresh_token');
+  try {
+    await apiFetch(`${API}/auth/logout/`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ refresh }),
+    });
+  } catch {}
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════
+(function init() {
+  let secKey = 'tronc_commun';
+  if (user) {
+    const spec = user.specialite;
+    const niv  = user.niveau;
+    if (spec && SECTIONS[spec])       secKey = spec;
+    else if (niv && NIV_DEFAULT[niv]) secKey = NIV_DEFAULT[niv];
+  }
+  buildForm(secKey);
+  loadNotes();
+})();
+</script>
+</body>
+</html>

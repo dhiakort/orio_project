@@ -1,0 +1,219 @@
+/* ═══════════════════════════════════════════════════════════════
+   ORIO — tests.css
+   Styles partagés : tabs, questionnaire, likert, résultats
+   Utilisé par : tests.html, bigfive.js, riasec.js
+   ═══════════════════════════════════════════════════════════════ */
+
+.wrap { max-width: 900px; margin: 0 auto; padding: 36px 24px 80px; }
+
+/* ── Onglets de sélection des tests ──────────────────────────── */
+.test-selector {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 16px; margin-bottom: 36px;
+}
+.test-tab {
+  background: white; border: 2px solid var(--border); border-radius: 18px;
+  padding: 20px 16px; cursor: pointer; text-align: center;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  position: relative;
+}
+.test-tab:hover      { border-color: var(--indigo-light); transform: translateY(-2px); }
+.test-tab.active     { border-color: var(--indigo); box-shadow: 0 4px 20px rgba(99,102,241,.15); }
+.test-tab.done       { border-color: var(--green); }
+.test-tab-emoji      { font-size: 28px; margin-bottom: 8px; display: block; }
+.test-tab-name       { font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 800; color: var(--text); }
+.test-tab-sub        { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+.test-tab-badge {
+  position: absolute; top: -8px; right: -8px;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: white;
+}
+.test-tab-badge.done   { background: var(--green); }
+.test-tab-badge.active { background: var(--indigo); }
+.test-tab-badge.todo   { background: var(--border); color: var(--text-soft); }
+
+/* ── Zone du test ─────────────────────────────────────────────── */
+.test-area    { animation: fadeIn .4s ease; }
+.results-area { display: none; animation: fadeIn .5s ease; }
+@keyframes fadeIn  { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+/* ── En-tête du test ──────────────────────────────────────────── */
+.test-header {
+  border-radius: 24px; padding: 28px 32px; color: white; margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.test-header::before {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,.06);
+}
+.test-header::after {
+  content: ''; position: absolute; bottom: -20px; left: 60px;
+  width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,.05);
+}
+.th-top      { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; position: relative; z-index: 1; }
+.th-emoji    { font-size: 36px; }
+.th-title    { font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 900; }
+.th-sub      { font-size: 13px; opacity: .8; margin-top: 2px; }
+.th-stats    { display: flex; gap: 20px; position: relative; z-index: 1; }
+.th-stat     { background: rgba(255,255,255,.15); border-radius: 12px; padding: 8px 16px; text-align: center; }
+.th-stat-val { font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 900; }
+.th-stat-lbl { font-size: 10px; opacity: .8; text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── Barre de progression ─────────────────────────────────────── */
+.prog-wrap { margin-bottom: 24px; }
+.prog-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.prog-lbl  { font-size: 13px; font-weight: 700; color: var(--text-soft); }
+.prog-pct  { font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 800; color: var(--indigo); }
+.prog-bg   { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; transition: width .4s cubic-bezier(.16,1,.3,1); }
+
+/* ── Indicateur de dimension ──────────────────────────────────── */
+.dim-indicator { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.dim-pill {
+  padding: 5px 14px; border-radius: 99px;
+  font-size: 12px; font-weight: 700;
+  background: var(--border); color: var(--text-soft);
+  transition: background .3s, color .3s;
+}
+.dim-pill.current { background: var(--indigo); color: white; }
+.dim-pill.done    { background: var(--green-light); color: var(--green-dark); }
+
+/* ── Carte de question ────────────────────────────────────────── */
+.q-card {
+  background: white; border-radius: 24px; border: 1.5px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,.05); overflow: hidden; margin-bottom: 16px;
+  animation: qSlide .35s cubic-bezier(.16,1,.3,1);
+}
+@keyframes qSlide { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+.q-head {
+  padding: 20px 26px 16px; border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.q-num {
+  min-width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo), var(--blue));
+  color: white; font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.q-dim-tag {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  padding: 3px 9px; border-radius: 99px; margin-bottom: 4px;
+}
+.q-text      { font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--text); }
+.q-rev-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; color: #d97706;
+  background: #fef3c7; border-radius: 99px; padding: 2px 8px;
+}
+
+/* ── Échelle Likert ───────────────────────────────────────────── */
+.q-options { padding: 18px 26px 22px; }
+.likert    { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+.lk-opt {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; padding: 12px 6px; border-radius: 14px;
+  border: 2px solid var(--border); background: var(--bg);
+  transition: border-color .2s, background .2s, transform .15s;
+}
+.lk-opt:hover              { border-color: var(--indigo-light); transform: translateY(-2px); }
+.lk-opt.selected           { border-color: var(--indigo); background: var(--indigo-light); transform: translateY(-2px); }
+.lk-opt.selected .lk-val   { color: var(--indigo); }
+.lk-circle {
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border);
+  background: white; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: border-color .2s, background .2s;
+}
+.lk-opt.selected .lk-circle { border-color: var(--indigo); background: var(--indigo); }
+.lk-tick                    { display: none; font-size: 16px; color: white; }
+.lk-opt.selected .lk-emoji  { display: none; }
+.lk-opt.selected .lk-tick   { display: block; }
+.lk-val  { font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 900; color: var(--text-soft); }
+.lk-lbl  { font-size: 9px; font-weight: 700; color: var(--text-soft); text-align: center; line-height: 1.2; }
+
+/* ── Navigation entre questions ──────────────────────────────── */
+.q-nav { display: flex; gap: 12px; margin-top: 8px; }
+.btn-prev {
+  padding: 12px 22px; border-radius: 12px; border: 2px solid var(--border);
+  font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 700;
+  background: white; color: var(--text-soft); cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.btn-prev:hover:not(:disabled) { border-color: var(--indigo); color: var(--indigo); }
+.btn-prev:disabled              { opacity: .4; cursor: not-allowed; }
+.btn-next-q {
+  flex: 1; padding: 13px 22px; border-radius: 12px; border: none;
+  font-family: 'Baloo 2', cursive; font-size: 15px; font-weight: 800;
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99,102,241,.28);
+  transition: transform .2s, box-shadow .2s, opacity .2s;
+}
+.btn-next-q:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(99,102,241,.36); }
+.btn-next-q:disabled              { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+/* ── Page résultats ───────────────────────────────────────────── */
+.result-header {
+  border-radius: 24px; padding: 32px; color: white;
+  text-align: center; margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.result-header::before { content: '✨'; position: absolute; top: 16px; left: 20px; font-size: 28px; opacity: .4; }
+.result-header::after  { content: '🌟'; position: absolute; bottom: 16px; right: 20px; font-size: 24px; opacity: .4; }
+.result-emoji   { font-size: 52px; margin-bottom: 12px; display: block; }
+.result-title   { font-family: 'Baloo 2', cursive; font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+.result-sub     { font-size: 14px; opacity: .85; }
+.result-profile {
+  display: inline-block; background: rgba(255,255,255,.2);
+  border-radius: 99px; padding: 6px 20px; font-size: 13px; font-weight: 700; margin-top: 12px;
+}
+
+/* ── Barres de dimensions ─────────────────────────────────────── */
+.dims-grid {
+  display: flex; flex-direction: column; gap: 14px;
+  background: white; border-radius: 24px; border: 1.5px solid var(--border);
+  padding: 26px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.04);
+}
+.dim-row-head  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.dim-row-left  { display: flex; align-items: center; gap: 8px; }
+.dim-icon      { font-size: 18px; }
+.dim-name      { font-size: 13px; font-weight: 800; }
+.dim-score-val { font-family: 'Baloo 2', cursive; font-size: 15px; font-weight: 900; }
+.dim-bar-bg    { height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.dim-bar-fill  { height: 100%; border-radius: 99px; transition: width .8s cubic-bezier(.16,1,.3,1); width: 0%; }
+.dim-desc      { font-size: 11px; color: var(--text-soft); margin-top: 4px; line-height: 1.4; }
+
+/* ── Cartes de profil ─────────────────────────────────────────── */
+.profile-card {
+  background: white; border-radius: 24px; border: 1.5px solid var(--border);
+  padding: 22px 26px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.04);
+}
+.pc-title { font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+.pc-tags  { display: flex; flex-wrap: wrap; gap: 8px; }
+.pc-tag   { padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700; }
+
+/* ── Boutons résultats ────────────────────────────────────────── */
+.result-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-retry {
+  padding: 13px 24px; border-radius: 12px; border: 2px solid var(--border);
+  font-family: 'Baloo 2', cursive; font-size: 14px; font-weight: 700;
+  background: white; color: var(--text); cursor: pointer; transition: all .2s;
+}
+.btn-retry:hover { border-color: var(--indigo); color: var(--indigo); }
+.btn-continue-test {
+  flex: 1; padding: 14px 24px; border-radius: 12px; border: none;
+  font-family: 'Baloo 2', cursive; font-size: 15px; font-weight: 800;
+  color: white; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(5,150,105,.28);
+  transition: transform .2s, box-shadow .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-continue-test:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(5,150,105,.36); }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .test-selector { grid-template-columns: 1fr; }
+  .likert        { grid-template-columns: repeat(5,1fr); gap: 4px; }
+  .lk-lbl        { display: none; }
+  .wrap          { padding: 20px 16px 60px; }
+}

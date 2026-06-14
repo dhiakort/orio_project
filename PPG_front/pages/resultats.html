@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ORIO — Mes Résultats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --indigo:#6366f1; --indigo-dark:#4f46e5; --indigo-light:#e0e7ff;
+      --blue:#38bdf8; --blue-dark:#0284c7;
+      --green:#34d399; --green-dark:#059669; --green-light:#d1fae5;
+      --yellow:#fbbf24; --yellow-light:#fef3c7;
+      --orange:#fb923c; --red:#f87171; --red-light:#fee2e2;
+      --purple:#a78bfa; --purple-light:#ede9fe;
+      --pink:#f472b6;
+      --white:#fff; --bg:#f8faff; --text:#1e293b; --text-soft:#64748b; --border:#e2e8f0;
+      --radius:20px; --radius-sm:12px;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position:sticky; top:0; z-index:100; height:64px;
+      background:rgba(255,255,255,.95); backdrop-filter:blur(18px);
+      border-bottom:1.5px solid rgba(99,102,241,.08);
+      display:flex; align-items:center; padding:0 32px; gap:14px;
+      box-shadow:0 2px 14px rgba(99,102,241,.07);
+    }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .nav-logo-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--indigo),var(--blue)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .nav-logo-txt { font-family:'Baloo 2',cursive; font-size:20px; font-weight:900; background:linear-gradient(135deg,var(--indigo),var(--blue-dark)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .nav-sep { width:1px; height:28px; background:var(--border); }
+    .nav-page { font-size:14px; font-weight:700; color:var(--text-soft); }
+    .nav-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+    .nav-pill { display:flex; align-items:center; gap:7px; background:var(--indigo-light); border-radius:99px; padding:5px 12px; }
+    .nav-av { width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,var(--indigo),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:white; }
+    .nav-name { font-size:13px; font-weight:700; color:var(--indigo-dark); }
+    .btn-back { font-size:13px; font-weight:700; color:var(--text-soft); background:none; border:1.5px solid var(--border); border-radius:8px; padding:5px 12px; cursor:pointer; text-decoration:none; transition:color .2s,border-color .2s; }
+    .btn-back:hover { color:var(--indigo); border-color:var(--indigo); }
+
+    /* ── LAYOUT ── */
+    .wrap { max-width:1100px; margin:0 auto; padding:32px 24px 80px; }
+
+    /* ── PAGE HEADER ── */
+    .page-head { margin-bottom:28px; }
+    .page-title { font-family:'Baloo 2',cursive; font-size:28px; font-weight:900; }
+    .page-sub { font-size:14px; color:var(--text-soft); margin-top:4px; }
+
+    /* ── LOADING ── */
+    .loading-wrap { text-align:center; padding:80px 20px; }
+    .loading-spinner { width:52px; height:52px; border:4px solid var(--indigo-light); border-top-color:var(--indigo); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 18px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-txt { font-size:15px; color:var(--text-soft); font-weight:600; }
+
+    /* ── TABS ── */
+    .tabs { display:flex; gap:6px; margin-bottom:28px; background:white; border-radius:16px; padding:6px; border:1.5px solid var(--border); width:fit-content; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .tab { display:flex; align-items:center; gap:7px; padding:9px 20px; border-radius:12px; font-size:14px; font-weight:700; color:var(--text-soft); cursor:pointer; border:none; background:none; transition:background .2s, color .2s; }
+    .tab:hover { background:var(--bg); color:var(--indigo); }
+    .tab.active { background:linear-gradient(135deg,var(--indigo),var(--blue)); color:white; box-shadow:0 4px 14px rgba(99,102,241,.28); }
+    .tab-panel { display:none; animation:fadeIn .35s ease; }
+    .tab-panel.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ── SECTION CARD ── */
+    .sc { background:white; border-radius:22px; border:1.5px solid var(--border); box-shadow:0 4px 18px rgba(0,0,0,.05); padding:24px 28px; margin-bottom:20px; }
+    .sc-title { font-family:'Baloo 2',cursive; font-size:16px; font-weight:800; display:flex; align-items:center; gap:9px; margin-bottom:18px; }
+
+    /* ── PROFIL HEADER ── */
+    .profil-header {
+      background:linear-gradient(135deg,var(--indigo) 0%,var(--blue-dark) 60%,#0ea5e9 100%);
+      border-radius:24px; padding:28px 32px; color:white; margin-bottom:24px;
+      display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+      box-shadow:0 8px 32px rgba(99,102,241,.28);
+      position:relative; overflow:hidden;
+    }
+    .profil-header::before { content:''; position:absolute; top:-50px; right:-50px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,.06); }
+    .profil-header::after  { content:''; position:absolute; bottom:-30px; left:30%; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.04); }
+    .ph-avatar { width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; font-family:'Baloo 2',cursive; border:3px solid rgba(255,255,255,.4); flex-shrink:0; }
+    .ph-info { flex:1; }
+    .ph-name { font-family:'Baloo 2',cursive; font-size:22px; font-weight:900; }
+    .ph-sub  { font-size:13px; opacity:.8; margin-top:3px; }
+    .ph-chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+    .ph-chip { background:rgba(255,255,255,.18); backdrop-filter:blur(8px); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.25); }
+    .ph-stats { display:flex; gap:12px; flex-wrap:wrap; }
+    .ph-stat { text-align:center; background:rgba(255,255,255,.15); backdrop-filter:blur(8px); border-radius:14px; padding:12px 18px; border:1px solid rgba(255,255,255,.2); }
+    .ph-stat-val { font-family:'Baloo 2',cursive; font-size:26px; font-weight:900; line-height:1; }
+    .ph-stat-lbl { font-size:10px; opacity:.75; text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+
+    /* ── COMPLÉTION ── */
+    .steps-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+    .step-pill { display:flex; align-items:center; gap:7px; padding:8px 14px; border-radius:12px; font-size:13px; font-weight:700; border:2px solid transparent; text-decoration:none; transition:transform .15s; }
+    .step-pill:hover { transform:translateY(-1px); }
+    .step-pill.done { background:var(--green-light); color:var(--green-dark); border-color:#86efac; }
+    .step-pill.todo { background:var(--bg); color:var(--text-soft); border-color:var(--border); }
+
+    /* ── RÉSULTATS DOMAINES ── */
+    .domaines-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .domaine-card {
+      border-radius:18px; padding:22px; border:2px solid var(--border); background:white;
+      transition:border-color .2s, transform .15s, box-shadow .2s;
+      position:relative; overflow:hidden;
+    }
+    .domaine-card.top1 {
+      border-color:var(--indigo); background:linear-gradient(145deg,#fafbff,var(--indigo-light));
+      grid-column:1/-1;
+    }
+    .domaine-card:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(99,102,241,.12); }
+    .dc-rank { position:absolute; top:12px; right:14px; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px; }
+    .dc-rank.gold { background:var(--yellow-light); color:#92400e; }
+    .dc-rank.silver { background:#f1f5f9; color:#475569; }
+    .dc-label { font-family:'Baloo 2',cursive; font-size:18px; font-weight:900; margin-bottom:3px; padding-right:90px; }
+    .dc-desc  { font-size:12px; color:var(--text-soft); margin-bottom:14px; }
+
+    /* Jauge + barres */
+    .dc-score-wrap { display:flex; align-items:center; gap:16px; }
+    .gauge-wrap { position:relative; width:76px; height:76px; flex-shrink:0; }
+    .gauge-wrap svg { transform:rotate(-90deg); }
+    .gauge-bg   { fill:none; stroke:var(--border); stroke-width:7; }
+    .gauge-fill { fill:none; stroke-width:7; stroke-linecap:round; transition:stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1); }
+    .gauge-txt  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Baloo 2',cursive; font-size:15px; font-weight:900; }
+    .dc-bars { flex:1; display:flex; flex-direction:column; gap:7px; }
+    .dc-bar-row { display:flex; align-items:center; gap:8px; font-size:11px; }
+    .dc-bar-lbl { width:88px; color:var(--text-soft); font-weight:600; flex-shrink:0; }
+    .dc-bar-bg  { flex:1; height:5px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .dc-bar-fill { height:100%; border-radius:99px; width:0; transition:width 1.4s cubic-bezier(.16,1,.3,1); }
+    .dc-bar-val { width:34px; font-weight:800; text-align:right; }
+
+    /* Explication */
+    .dc-explication { margin-top:14px; padding-top:12px; border-top:1.5px solid var(--border); }
+    .dc-message { font-size:12px; color:var(--text-soft); line-height:1.6; margin-bottom:8px; }
+    .dc-chips-row { display:flex; flex-wrap:wrap; gap:5px; }
+    .dc-chip-g { background:var(--green-light); color:var(--green-dark); padding:2px 9px; border-radius:99px; font-size:10px; font-weight:700; }
+    .dc-chip-w { background:var(--yellow-light); color:#92400e; padding:2px 9px; border-radius:99px; font-size:10px; font-weight:700; }
+
+    /* Risque badge */
+    .risque-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:800; margin-bottom:8px; }
+    .risque-faible { background:var(--green-light); color:var(--green-dark); }
+    .risque-modere { background:var(--yellow-light); color:#92400e; }
+    .risque-eleve  { background:var(--red-light); color:#dc2626; }
+
+    /* Sections éliminées */
+    .elimines-section { margin-top:8px; }
+    .elimines-toggle { background:none; border:1.5px solid var(--border); border-radius:10px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--text-soft); cursor:pointer; display:flex; align-items:center; gap:6px; transition:border-color .2s,color .2s; }
+    .elimines-toggle:hover { border-color:var(--red); color:var(--red); }
+    .elimines-list { display:none; margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    .elimine-item { background:var(--red-light); border:1.5px solid #fca5a5; border-radius:12px; padding:10px 14px; }
+    .elimine-label { font-size:13px; font-weight:800; color:#dc2626; margin-bottom:4px; }
+    .elimine-raison { font-size:11px; color:#991b1b; }
+
+    /* ── RADAR SVG ── */
+    .radars-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .radar-card { text-align:center; }
+
+    /* ── SCORES DOMAINES NOTES ── */
+    .dom-scores-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .dom-score-item { background:var(--bg); border-radius:14px; padding:14px 16px; border:1.5px solid var(--border); }
+    .dom-score-label { font-size:12px; font-weight:700; color:var(--text-soft); margin-bottom:6px; }
+    .dom-score-val { font-family:'Baloo 2',cursive; font-size:22px; font-weight:900; }
+    .dom-score-bar-bg { height:5px; border-radius:99px; background:var(--border); overflow:hidden; margin-top:6px; }
+    .dom-score-bar-fill { height:100%; border-radius:99px; transition:width 1.2s cubic-bezier(.16,1,.3,1); }
+
+    /* ── ROADMAP ── */
+    .roadmap-steps { display:flex; flex-direction:column; gap:0; }
+    .rm-step { display:flex; gap:16px; padding:0 0 26px; }
+    .rm-step:last-child { padding-bottom:0; }
+    .rm-left { display:flex; flex-direction:column; align-items:center; width:44px; flex-shrink:0; }
+    .rm-num { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--indigo),var(--blue)); color:white; font-family:'Baloo 2',cursive; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(99,102,241,.3); flex-shrink:0; }
+    .rm-line { flex:1; width:2px; background:linear-gradient(to bottom,var(--indigo-light),transparent); margin-top:4px; min-height:20px; }
+    .rm-step:last-child .rm-line { display:none; }
+    .rm-body { flex:1; padding-top:8px; }
+    .rm-titre { font-family:'Baloo 2',cursive; font-size:16px; font-weight:800; margin-bottom:4px; }
+    .rm-duree { display:inline-block; background:var(--yellow-light); color:#92400e; font-size:11px; font-weight:700; padding:2px 10px; border-radius:99px; margin-bottom:8px; }
+    .rm-desc { font-size:13px; color:var(--text-soft); line-height:1.6; margin-bottom:10px; }
+    .rm-actions { display:flex; flex-direction:column; gap:5px; }
+    .rm-action { display:flex; align-items:flex-start; gap:7px; font-size:13px; }
+    .rm-action::before { content:'→'; color:var(--indigo); font-weight:800; flex-shrink:0; }
+
+    .chips-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .skill-chip { background:var(--purple-light); color:#5b21b6; padding:5px 13px; border-radius:99px; font-size:12px; font-weight:700; }
+    .ressource-card { border:1.5px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
+    .res-icon { width:38px; height:38px; border-radius:10px; background:var(--indigo-light); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .res-titre { font-size:13px; font-weight:800; }
+    .res-desc { font-size:11px; color:var(--text-soft); }
+    .res-tag { margin-left:auto; font-size:10px; font-weight:700; background:var(--green-light); color:var(--green-dark); padding:2px 8px; border-radius:99px; white-space:nowrap; }
+
+    .msg-encouragement { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:2px solid #bbf7d0; border-radius:16px; padding:20px 22px; margin-bottom:20px; }
+    .msg-txt { font-size:14px; color:#065f46; line-height:1.7; font-weight:600; }
+
+    .btn-generate { display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,var(--indigo),var(--blue)); color:white; font-family:'Baloo 2',cursive; font-size:15px; font-weight:800; border:none; border-radius:14px; padding:14px 28px; cursor:pointer; box-shadow:0 4px 16px rgba(99,102,241,.3); transition:transform .2s,box-shadow .2s; width:100%; }
+    .btn-generate:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 24px rgba(99,102,241,.38); }
+    .btn-generate:disabled { opacity:.65; cursor:not-allowed; }
+
+    /* Toast */
+    .toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:white; font-size:14px; font-weight:700; padding:12px 22px; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.18); transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s; opacity:0; z-index:9999; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+    .toast.ok  { background:linear-gradient(135deg,#059669,#34d399); }
+    .toast.err { background:linear-gradient(135deg,#dc2626,#f87171); }
+
+    @media(max-width:720px) {
+      .domaines-grid,.radars-row,.dom-scores-grid { grid-template-columns:1fr; }
+      .domaine-card.top1 { grid-column:1; }
+      .tabs { width:100%; }
+      .tab { font-size:12px; padding:8px 12px; }
+      .wrap { padding:16px 14px 60px; }
+      .navbar { padding:0 16px; }
+      .ph-stats { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">🎯</div>
+    <span class="nav-logo-txt">ORIO</span>
+  </a>
+  <div class="nav-sep"></div>
+  <span class="nav-page">🏆 Mes Résultats</span>
+  <div class="nav-right">
+    <div class="nav-pill">
+      <div class="nav-av" id="nav-av">?</div>
+      <span class="nav-name" id="nav-name">—</span>
+    </div>
+    <a href="index.html" class="btn-back">← Accueil</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1 class="page-title">🏆 Tes résultats d'orientation</h1>
+    <p class="page-sub">Analyse complète · Recommandations personnalisées · Roadmap IA</p>
+  </div>
+
+  <!-- Chargement -->
+  <div id="loading-wrap" class="loading-wrap">
+    <div class="loading-spinner"></div>
+    <div class="loading-txt" id="loading-txt">Analyse de ton profil en cours…</div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div id="main-content" style="display:none">
+
+    <!-- Header profil -->
+    <div class="profil-header">
+      <div class="ph-avatar" id="ph-avatar">?</div>
+      <div class="ph-info">
+        <div class="ph-name" id="ph-name">—</div>
+        <div class="ph-sub"  id="ph-sub">—</div>
+        <div class="ph-chips" id="ph-chips"></div>
+      </div>
+      <div class="ph-stats" id="ph-stats"></div>
+    </div>
+
+    <!-- Complétion -->
+    <div class="steps-row" id="steps-row"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('resultats',this)">🎯 Résultats</button>
+      <button class="tab" onclick="switchTab('profil',this)">🧠 Mon profil</button>
+      <button class="tab" onclick="switchTab('roadmap',this)">🗺️ Roadmap IA</button>
+    </div>
+
+    <!-- TAB RÉSULTATS -->
+    <div class="tab-panel active" id="tab-resultats">
+      <div class="sc">
+        <div class="sc-title">🏆 Domaines recommandés pour toi</div>
+        <div class="domaines-grid" id="domaines-grid"></div>
+      </div>
+      <div class="sc elimines-section" id="elimines-section" style="display:none">
+        <div class="sc-title">❌ Sections non compatibles</div>
+        <p style="font-size:13px;color:var(--text-soft);margin-bottom:12px">
+          Ces sections ont été exclues car ton profil académique actuel ne satisfait pas les conditions minimales requises.
+        </p>
+        <div class="elimines-list" id="elimines-list"></div>
+      </div>
+    </div>
+
+    <!-- TAB PROFIL -->
+    <div class="tab-panel" id="tab-profil">
+
+      <!-- Scores domaines depuis les notes -->
+      <div class="sc">
+        <div class="sc-title">📊 Scores par domaine académique</div>
+        <div class="dom-scores-grid" id="dom-scores-grid"></div>
+      </div>
+
+      <!-- Radars -->
+      <div class="radars-row">
+        <div class="sc radar-card">
+          <div class="sc-title">🌟 Big Five — Personnalité</div>
+          <svg id="radar-bf" width="260" height="260" viewBox="-130 -130 260 260" style="overflow:visible"></svg>
+          <div id="bf-legend" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+        </div>
+        <div class="sc radar-card">
+          <div class="sc-title">🎯 RIASEC — Intérêts</div>
+          <svg id="radar-ri" width="260" height="260" viewBox="-130 -130 260 260" style="overflow:visible"></svg>
+          <div id="ri-legend" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+        </div>
+      </div>
+
+      <!-- Compétences -->
+      <div class="sc">
+        <div class="sc-title">⚡ Compétences cognitives</div>
+        <div id="comp-bars"></div>
+      </div>
+
+    </div>
+
+    <!-- TAB ROADMAP -->
+    <div class="tab-panel" id="tab-roadmap">
+      <div id="roadmap-content">
+        <div class="sc" style="text-align:center;padding:48px 24px">
+          <div style="font-size:52px;margin-bottom:14px">🗺️</div>
+          <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;margin-bottom:8px">Génère ta roadmap personnalisée</div>
+          <div style="font-size:14px;color:var(--text-soft);margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6">
+            Notre IA (Claude Haiku) va analyser ton profil complet et créer un plan d'action sur mesure pour atteindre tes objectifs universitaires.
+          </div>
+          <button class="btn-generate" id="btn-generate" onclick="genererRoadmap()">
+            ✨ Générer ma roadmap avec l'IA
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+const API   = 'http://127.0.0.1:8000/api';
+const token = localStorage.getItem('access_token');
+const user  = JSON.parse(localStorage.getItem('user') || 'null');
+if (!token) window.location.href = 'login.html';
+
+// Init nav
+if (user) {
+  document.getElementById('nav-name').textContent = user.first_name || user.email;
+  document.getElementById('nav-av').textContent   = (user.first_name || 'U')[0].toUpperCase();
+}
+
+// ── apiFetch avec auto-refresh ──────────────────────────────────────
+async function apiFetch(url, opts = {}) {
+  opts.headers = { ...(opts.headers||{}), 'Authorization': 'Bearer ' + localStorage.getItem('access_token') };
+  let res = await fetch(url, opts);
+  if (res.status === 401) {
+    const r = await fetch(`${API}/auth/token/refresh/`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ refresh: localStorage.getItem('refresh_token') }),
+    });
+    if (r.ok) {
+      const d = await r.json();
+      localStorage.setItem('access_token', d.access);
+      opts.headers['Authorization'] = 'Bearer ' + d.access;
+      res = await fetch(url, opts);
+    } else { window.location.href = 'login.html'; return null; }
+  }
+  return res;
+}
+
+let DATA_RECO   = null;
+let DATA_PROFIL = null;
+
+// ══════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════
+async function init() {
+  try {
+    setLoading('Chargement de ton profil…');
+    const resProfil = await apiFetch(`${API}/scoring/profil-complet/`);
+    DATA_PROFIL = await resProfil.json();
+
+    setLoading('Calcul des recommandations…');
+    const resReco = await apiFetch(`${API}/scoring/recommandation/`);
+
+    if (!resReco.ok) {
+      const err = await resReco.json();
+      showErreur(err.error || err.detail || 'Erreur lors du calcul des recommandations.');
+      return;
+    }
+    DATA_RECO = await resReco.json();
+
+    afficherProfilHeader();
+    afficherCompletion();
+    afficherResultats();
+    afficherProfilPsycho();
+
+    document.getElementById('loading-wrap').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+
+  } catch(e) {
+    showErreur('Erreur réseau. Vérifie que le serveur Django est lancé (python manage.py runserver).');
+  }
+}
+
+function setLoading(msg) {
+  document.getElementById('loading-txt').textContent = msg;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PROFIL HEADER
+// ══════════════════════════════════════════════════════════════════════
+function afficherProfilHeader() {
+  const notes = DATA_PROFIL.notes;
+  const bf    = DATA_PROFIL.bigfive;
+  const ri    = DATA_PROFIL.riasec;
+
+  const letter = (user?.first_name || 'E')[0].toUpperCase();
+  document.getElementById('ph-avatar').textContent = letter;
+  document.getElementById('ph-name').textContent   =
+    (user?.first_name && user?.last_name) ? `${user.first_name} ${user.last_name}` : (user?.email || '—');
+
+  const niveauMap = {'1ere':'1ère secondaire','2eme_s':'2ème secondaire','3eme_s':'3ème secondaire','4eme_s':'Terminale Bac'};
+  const niv = niveauMap[DATA_RECO?.niveau] || DATA_RECO?.niveau || '';
+  const spe = DATA_RECO?.specialite ? ` — ${DATA_RECO.specialite.replace(/_/g,' ')}` : '';
+  document.getElementById('ph-sub').textContent = niv + spe;
+
+  const chips = [];
+  if (bf?.profil_dominant)  chips.push(`🌟 ${bf.profil_dominant}`);
+  if (ri?.code_holland)     chips.push(`🎯 RIASEC : ${ri.code_holland}`);
+  if (notes?.niveau_global) chips.push(`📊 ${notes.niveau_global}`);
+  document.getElementById('ph-chips').innerHTML =
+    chips.map(c => `<span class="ph-chip">${c}</span>`).join('');
+
+  const stats = [];
+  if (notes?.moyenne_ponderee != null)
+    stats.push({ val: notes.moyenne_ponderee.toFixed(1), lbl: 'Moyenne' });
+  if (DATA_RECO?.resultats?.length)
+    stats.push({ val: DATA_RECO.resultats[0].score_final + '%', lbl: 'Top match' });
+  if (DATA_PROFIL?.completion?.total != null)
+    stats.push({ val: DATA_PROFIL.completion.total + '/4', lbl: 'Tests faits' });
+
+  document.getElementById('ph-stats').innerHTML = stats.map(s => `
+    <div class="ph-stat">
+      <div class="ph-stat-val">${s.val}</div>
+      <div class="ph-stat-lbl">${s.lbl}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  COMPLÉTION
+// ══════════════════════════════════════════════════════════════════════
+function afficherCompletion() {
+  const c = DATA_PROFIL.completion || {};
+  const items = [
+    { key:'notes',       label:'📊 Notes',      href:'notes.html' },
+    { key:'bigfive',     label:'🌟 Big Five',    href:'bigfive.html' },
+    { key:'riasec',      label:'🎯 RIASEC',      href:'riasec.html' },
+    { key:'competences', label:'⚡ Compétences', href:'competences.html' },
+  ];
+  document.getElementById('steps-row').innerHTML = items.map(i => {
+    const done = !!c[i.key];
+    return `<a href="${done ? '#' : i.href}" class="step-pill ${done?'done':'todo'}">
+      ${done ? '✅' : '○'} ${i.label}
+    </a>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RÉSULTATS DOMAINES
+// ══════════════════════════════════════════════════════════════════════
+const COLORS = ['#6366f1','#10b981','#f59e0b','#f472b6','#38bdf8'];
+
+function afficherResultats() {
+  const resultats = DATA_RECO.resultats || [];
+  const elimines  = DATA_RECO.elimines  || [];
+  const grid      = document.getElementById('domaines-grid');
+
+  grid.innerHTML = resultats.map((r, i) => {
+    const color  = COLORS[i] || '#6366f1';
+    const R      = 30;
+    const circ   = 2 * Math.PI * R;
+    const offset = circ * (1 - r.score_final / 100);
+    const isTop  = i === 0;
+
+    // Chips forces/améliorations
+    const forcesHtml = (r.forces || []).map(f =>
+      `<span class="dc-chip-g">✅ ${f}</span>`).join('');
+    const axesHtml = (r.axes_amelioration || []).map(a =>
+      `<span class="dc-chip-w">📈 ${a}</span>`).join('');
+
+    // Classe risque
+    const risqueClass = {faible:'risque-faible', modéré:'risque-modere', élevé:'risque-eleve'}[r.niveau_risque] || 'risque-modere';
+
+    return `
+    <div class="domaine-card ${isTop?'top1':''}">
+      <div class="dc-rank ${isTop?'gold':'silver'}">${isTop?'🥇 Meilleur match':'#'+(i+1)}</div>
+      <div class="dc-label">${r.label}</div>
+      <div class="dc-desc">${r.description}</div>
+
+      <div class="dc-score-wrap">
+        <div class="gauge-wrap">
+          <svg width="76" height="76" viewBox="0 0 76 76">
+            <circle class="gauge-bg" cx="38" cy="38" r="${R}"/>
+            <circle class="gauge-fill" cx="38" cy="38" r="${R}"
+              stroke="${color}"
+              stroke-dasharray="${circ.toFixed(2)}"
+              stroke-dashoffset="${circ.toFixed(2)}"
+              data-offset="${offset.toFixed(2)}"
+              id="gauge-${i}"/>
+          </svg>
+          <div class="gauge-txt" style="color:${color}">${r.score_final}%</div>
+        </div>
+        <div class="dc-bars">
+          ${dcBar('📚 Académique', r.detail.score_academique, '#6366f1')}
+          ${dcBar('🎯 RIASEC',     r.detail.score_riasec,     '#10b981')}
+          ${dcBar('🌟 Big Five',   r.detail.score_bigfive,    '#f59e0b')}
+          ${dcBar('⚡ Aptitudes',  r.detail.score_competences,'#f472b6')}
+        </div>
+      </div>
+
+      <div class="dc-explication">
+        <span class="risque-badge ${risqueClass}">${r.risque_emoji || ''} Risque ${r.niveau_risque}</span>
+        <div class="dc-message">${r.message || ''}</div>
+        <div class="dc-chips-row">
+          ${forcesHtml}${axesHtml}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Animer jauges
+  setTimeout(() => {
+    resultats.forEach((_, i) => {
+      const el = document.getElementById(`gauge-${i}`);
+      if (el) el.style.strokeDashoffset = el.dataset.offset;
+    });
+  }, 150);
+
+  // Sections éliminées
+  if (elimines.length > 0) {
+    document.getElementById('elimines-section').style.display = 'block';
+    document.getElementById('elimines-list').innerHTML = elimines.map(e => `
+      <div class="elimine-item">
+        <div class="elimine-label">${e.label}</div>
+        <div class="elimine-raison">${(e.raisons || []).join(' · ')}</div>
+      </div>`).join('');
+  }
+}
+
+function dcBar(label, val, color) {
+  const v = Math.round(val || 0);
+  return `
+  <div class="dc-bar-row">
+    <span class="dc-bar-lbl">${label}</span>
+    <div class="dc-bar-bg">
+      <div class="dc-bar-fill" style="background:${color}" data-w="${v}"></div>
+    </div>
+    <span class="dc-bar-val" style="color:${color}">${v}%</span>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RADAR SVG
+// ══════════════════════════════════════════════════════════════════════
+function dessinerRadar(svgId, labels, values, color) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const n = labels.length;
+  const R = 90;
+  const angles = labels.map((_, i) => (2 * Math.PI * i / n) - Math.PI / 2);
+  const pt = (a, r) => ({ x: r * Math.cos(a), y: r * Math.sin(a) });
+  let html = '';
+
+  // Grilles
+  [.2,.4,.6,.8,1].forEach(f => {
+    const pts = angles.map(a => pt(a, R * f));
+    const d   = pts.map((p,i) => `${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('') + 'Z';
+    html += `<path d="${d}" fill="none" stroke="${f===1?'#cbd5e1':'#e2e8f0'}" stroke-width="${f===1?1.5:.7}"/>`;
+  });
+
+  // Axes
+  angles.forEach(a => {
+    const p = pt(a, R);
+    html += `<line x1="0" y1="0" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#e2e8f0" stroke-width=".7"/>`;
+  });
+
+  // Zone données
+  const dpts  = angles.map((a,i) => pt(a, R * (values[i] / 100)));
+  const dpath = dpts.map((p,i) => `${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('') + 'Z';
+  html += `<path d="${dpath}" fill="${color}20" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+
+  // Points
+  dpts.forEach(p => {
+    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${color}" stroke="white" stroke-width="2"/>`;
+  });
+
+  // Labels
+  angles.forEach((a, i) => {
+    const p  = pt(a, R + 20);
+    const pv = pt(a, R * (values[i] / 100));
+    html += `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}"
+      text-anchor="middle" dominant-baseline="central"
+      font-size="11" font-weight="700" font-family="Nunito,sans-serif" fill="#64748b">${labels[i]}</text>`;
+    html += `<text x="${pv.x.toFixed(1)}" y="${(pv.y-10).toFixed(1)}"
+      text-anchor="middle" dominant-baseline="central"
+      font-size="9" font-weight="800" font-family="Nunito,sans-serif" fill="${color}">${Math.round(values[i])}</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PROFIL PSYCHO
+// ══════════════════════════════════════════════════════════════════════
+function afficherProfilPsycho() {
+  const bf   = DATA_PROFIL.bigfive;
+  const ri   = DATA_PROFIL.riasec;
+  const comp = DATA_PROFIL.competences;
+  const notes = DATA_PROFIL.notes;
+
+  // Scores domaines
+  const domGrid = document.getElementById('dom-scores-grid');
+  if (notes?.scores_domaines) {
+    const items = [
+      { label:'🔬 Scientifique', key:'scientifique', color:'#10b981' },
+      { label:'💻 Informatique', key:'informatique', color:'#6366f1' },
+      { label:'💼 Économique',   key:'economique',   color:'#f59e0b' },
+      { label:'📚 Littéraire',   key:'litteraire',   color:'#f472b6' },
+    ];
+    domGrid.innerHTML = items.map(it => {
+      const val = notes.scores_domaines[it.key];
+      const pct = val != null ? Math.round((val / 20) * 100) : 0;
+      const lbl = val != null ? `${val.toFixed(1)}/20` : '—';
+      return `
+      <div class="dom-score-item">
+        <div class="dom-score-label">${it.label}</div>
+        <div class="dom-score-val" style="color:${it.color}">${lbl}</div>
+        <div class="dom-score-bar-bg">
+          <div class="dom-score-bar-fill" style="width:${pct}%;background:${it.color}"></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    domGrid.innerHTML = '<p style="color:var(--text-soft);font-size:13px;grid-column:1/-1">Notes non saisies.</p>';
+  }
+
+  // Big Five radar
+  if (bf?.scores) {
+    const labels = ['Ouverture','Conscient.','Extraver.','Agréab.','Névros.'];
+    const vals   = [bf.scores.ouverture, bf.scores.conscienciosite,
+                    bf.scores.extraversion, bf.scores.agreabilite, bf.scores.nevrosisme];
+    dessinerRadar('radar-bf', labels, vals, '#6366f1');
+    document.getElementById('bf-legend').innerHTML = `
+      <span style="background:var(--indigo-light);color:var(--indigo);padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700">
+        Dominant : ${bf.profil_dominant}
+      </span>
+      <span style="background:var(--bg);border:1.5px solid var(--border);padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;color:var(--text-soft)">
+        Secondaire : ${bf.profil_secondaire}
+      </span>`;
+  } else {
+    document.getElementById('radar-bf').outerHTML =
+      '<p style="color:var(--text-soft);font-size:13px;padding:20px">Test Big Five non complété.</p>';
+  }
+
+  // RIASEC radar
+  if (ri?.scores) {
+    const codes = ['R','I','A','S','E','C'];
+    const noms  = ['Réaliste','Investigatif','Artistique','Social','Entreprenant','Conventionnel'];
+    dessinerRadar('radar-ri', codes, codes.map(k => ri.scores[k] || 0), '#10b981');
+    document.getElementById('ri-legend').innerHTML = codes.map((c, i) =>
+      `<span style="background:var(--bg);border:1.5px solid var(--border);padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;color:var(--text-soft)">
+        ${c} ${noms[i]} : ${Math.round(ri.scores[c] || 0)}
+      </span>`).join('');
+  } else {
+    document.getElementById('radar-ri').outerHTML =
+      '<p style="color:var(--text-soft);font-size:13px;padding:20px">Test RIASEC non complété.</p>';
+  }
+
+  // Compétences barres
+  const compDiv = document.getElementById('comp-bars');
+  if (comp) {
+    const items = [
+      { label:'⚡ Rapidité calcul',     val: comp.score_calcul  || 0, color:'#6366f1' },
+      { label:'🧩 Raisonnement logique',val: comp.score_logique || 0, color:'#10b981' },
+      { label:'🧠 Mémoire visuelle',    val: comp.score_memoire || 0, color:'#f59e0b' },
+    ];
+    compDiv.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        ${items.map(it => `
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:13px;font-weight:700">${it.label}</span>
+            <span style="font-family:'Baloo 2',cursive;font-size:15px;font-weight:900;color:${it.color}">${Math.round(it.val)}/100</span>
+          </div>
+          <div style="height:10px;background:var(--border);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${it.val}%;background:${it.color};border-radius:99px;transition:width 1.2s cubic-bezier(.16,1,.3,1)"></div>
+          </div>
+        </div>`).join('')}
+        <div style="border-top:1.5px solid var(--border);padding-top:14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:14px;font-weight:700">Score global</span>
+          <span style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:900;color:var(--indigo)">${Math.round(comp.score_global||0)}/100</span>
+        </div>
+      </div>`;
+  } else {
+    compDiv.innerHTML = '<p style="color:var(--text-soft);font-size:13px">Jeux cognitifs non complétés.</p>';
+  }
+
+  // Animer barres largeur
+  setTimeout(() => {
+    document.querySelectorAll('.dc-bar-fill[data-w]').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 200);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ROADMAP
+// ══════════════════════════════════════════════════════════════════════
+async function genererRoadmap() {
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true;
+  btn.innerHTML = `<span style="display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px"></span>L'IA génère ta roadmap…`;
+
+  try {
+    const res  = await apiFetch(`${API}/scoring/roadmap/`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:'{}',
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast('❌ ' + (data.error || 'Erreur serveur'), 'err');
+      btn.disabled = false;
+      btn.innerHTML = '✨ Générer ma roadmap avec l\'IA';
+      return;
+    }
+
+    afficherRoadmap(data.roadmap);
+    toast('✅ Roadmap générée !', 'ok');
+
+  } catch(e) {
+    toast('🌐 Erreur réseau', 'err');
+    btn.disabled = false;
+    btn.innerHTML = '✨ Générer ma roadmap avec l\'IA';
+  }
+}
+
+function afficherRoadmap(rm) {
+  if (!rm) return;
+  const stepsHtml = (rm.roadmap || []).map(s => `
+    <div class="rm-step">
+      <div class="rm-left">
+        <div class="rm-num">${s.etape}</div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-titre">${s.titre}</div>
+        <span class="rm-duree">⏱ ${s.duree}</span>
+        <div class="rm-desc">${s.description}</div>
+        <div class="rm-actions">
+          ${(s.actions||[]).map(a => `<div class="rm-action">${a}</div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+
+  const skillsHtml = (rm.competences_a_developper||[])
+    .map(c => `<span class="skill-chip">${c}</span>`).join('');
+
+  const ressHtml = (rm.ressources||[]).map(r => `
+    <div class="ressource-card">
+      <div class="res-icon">${r.type==='site web'?'🌐':r.type==='plateforme'?'💻':r.type==='livre'?'📚':'📱'}</div>
+      <div>
+        <div class="res-titre">${r.titre}</div>
+        <div class="res-desc">${r.lien_ou_description}</div>
+      </div>
+      ${r.gratuit ? '<span class="res-tag">Gratuit ✅</span>' : ''}
+    </div>`).join('');
+
+  document.getElementById('roadmap-content').innerHTML = `
+    ${rm.message_encouragement ? `
+    <div class="msg-encouragement">
+      <div style="font-size:20px;margin-bottom:6px">💬</div>
+      <div class="msg-txt">${rm.message_encouragement}</div>
+    </div>` : ''}
+
+    <div class="sc">
+      <div class="sc-title">🗺️ Ton plan d'action</div>
+      <div class="roadmap-steps">${stepsHtml}</div>
+    </div>
+
+    ${skillsHtml ? `
+    <div class="sc">
+      <div class="sc-title">💡 Compétences à développer</div>
+      <div class="chips-row">${skillsHtml}</div>
+    </div>` : ''}
+
+    ${ressHtml ? `
+    <div class="sc">
+      <div class="sc-title">📚 Ressources recommandées</div>
+      <div style="display:flex;flex-direction:column;gap:10px">${ressHtml}</div>
+    </div>` : ''}`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showErreur(msg) {
+  document.getElementById('loading-wrap').innerHTML = `
+    <div style="font-size:52px;margin-bottom:14px">⚠️</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;margin-bottom:10px;color:var(--text)">${msg}</div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <a href="notes.html" style="color:var(--indigo);font-weight:700;font-size:14px;border:2px solid var(--indigo-light);padding:8px 18px;border-radius:10px;text-decoration:none">📊 Saisir mes notes</a>
+      <a href="bigfive.html" style="color:var(--green-dark);font-weight:700;font-size:14px;border:2px solid #86efac;padding:8px 18px;border-radius:10px;text-decoration:none">🌟 Passer les tests</a>
+    </div>`;
+}
+
+let _tmr;
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type;
+  t.classList.add('show');
+  clearTimeout(_tmr);
+  _tmr = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+// Lancement
+init();
+</script>
+</body>
+</html>

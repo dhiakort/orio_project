@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ORIO — Inscription</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --indigo:#6366f1; --indigo-dark:#4f46e5; --indigo-light:#e0e7ff;
+      --blue:#38bdf8; --blue-dark:#0284c7;
+      --green:#34d399; --green-light:#d1fae5; --green-dark:#059669;
+      --yellow:#fbbf24; --yellow-light:#fef3c7;
+      --purple:#a78bfa; --purple-light:#ede9fe;
+      --pink:#f472b6; --orange:#fb923c;
+      --white:#fff; --text:#1e293b; --text-soft:#64748b; --border:#e2e8f0;
+      --radius-sm:12px;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:'Nunito',sans-serif;
+      background:linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 45%,#ede9fe 100%);
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:24px 16px; position:relative; overflow-x:hidden;
+    }
+
+    /* ── Background bubbles ── */
+    .bg { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+    .bub { position:absolute; border-radius:50%; opacity:.13; animation:rise linear infinite; }
+    .bub:nth-child(1){width:90px;height:90px;background:#6366f1;left:4%;bottom:-120px;animation-duration:14s;}
+    .bub:nth-child(2){width:55px;height:55px;background:#a78bfa;left:17%;bottom:-120px;animation-duration:10s;animation-delay:2s;}
+    .bub:nth-child(3){width:120px;height:120px;background:#34d399;left:33%;bottom:-120px;animation-duration:17s;animation-delay:1s;}
+    .bub:nth-child(4){width:70px;height:70px;background:#fbbf24;left:53%;bottom:-120px;animation-duration:12s;animation-delay:3s;}
+    .bub:nth-child(5){width:95px;height:95px;background:#f472b6;left:70%;bottom:-120px;animation-duration:15s;animation-delay:.5s;}
+    .bub:nth-child(6){width:50px;height:50px;background:#38bdf8;left:85%;bottom:-120px;animation-duration:9s;animation-delay:4s;}
+    @keyframes rise{0%{transform:translateY(0) rotate(0deg);opacity:.13;}100%{transform:translateY(-115vh) rotate(720deg);opacity:0;}}
+    .star{position:absolute;font-size:20px;animation:twinkle 3s ease-in-out infinite;opacity:.45;}
+    .star:nth-child(7){top:7%;left:7%;}
+    .star:nth-child(8){top:10%;right:9%;animation-delay:1.1s;}
+    .star:nth-child(9){top:63%;left:3%;animation-delay:.6s;}
+    .star:nth-child(10){top:77%;right:4%;animation-delay:1.9s;}
+    @keyframes twinkle{0%,100%{transform:scale(1);opacity:.4;}50%{transform:scale(1.35) rotate(18deg);opacity:.85;}}
+
+    /* ── Card ── */
+    .card {
+      position:relative; z-index:1;
+      background:rgba(255,255,255,.94); backdrop-filter:blur(22px);
+      border-radius:28px;
+      box-shadow:0 10px 48px rgba(99,102,241,.13),0 2px 8px rgba(0,0,0,.06);
+      padding:24px 28px 28px; width:100%; max-width:520px;
+      animation:slideUp .65s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(36px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+    /* ── Header ── */
+    .card-header { text-align:center; margin-bottom:14px; }
+    .logo { display:inline-flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .logo-icon {
+      width:42px; height:42px;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(99,102,241,.38);
+    }
+    .logo-icon img {
+      width:42px; height:42px;
+      object-fit:contain;
+    }
+    .logo-text {
+      font-family:'Baloo 2',cursive; font-size:24px; font-weight:900;
+      background:linear-gradient(135deg,#6366f1,#0284c7);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .card-title { font-family:'Baloo 2',cursive; font-size:18px; font-weight:800; color:var(--text); margin-bottom:2px; }
+    .card-subtitle { font-size:13px; color:var(--text-soft); }
+
+    /* ── Progress dots ── */
+    .dots { display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:14px; }
+    .dot { width:6px; height:6px; border-radius:50%; background:var(--border); transition:background .3s,transform .3s; }
+    .dot.active { background:var(--indigo); transform:scale(1.45); }
+    .dot.done   { background:var(--green); }
+
+    /* ── Form ── */
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .g-full { grid-column:1/-1; }
+    .fg { display:flex; flex-direction:column; gap:4px; }
+    label { font-size:12px; font-weight:700; color:var(--text); }
+    label em { color:var(--indigo); font-style:normal; }
+    input, select {
+      width:100%; border:2px solid var(--border); border-radius:var(--radius-sm);
+      padding:9px 12px; font-size:13px; font-family:'Nunito',sans-serif;
+      color:var(--text); background:var(--white);
+      transition:border-color .2s, box-shadow .2s; outline:none;
+    }
+    input:focus, select:focus { border-color:var(--indigo); box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+    input::placeholder { color:#b0bec5; }
+
+    /* ── Select with icon ── */
+    .sel-wrap { position:relative; }
+    .sel-wrap select { padding-left:42px; cursor:pointer; appearance:none; -webkit-appearance:none; }
+    .sel-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:18px; pointer-events:none; }
+    .sel-arr  { position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--text-soft); }
+    .sel-arr svg { width:14px; height:14px; }
+
+    /* ── Niveau banner ── */
+    .niv-banner {
+      display:none; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:var(--radius-sm);
+      font-size:13px; font-weight:600; border:2px solid transparent;
+      animation:pop .35s cubic-bezier(.16,1,.3,1);
+    }
+    .niv-banner.show { display:flex; }
+    @keyframes pop { from{opacity:0;transform:scale(.94);} to{opacity:1;transform:scale(1);} }
+    .niv-banner-text small { display:block; font-size:11px; font-weight:400; opacity:.75; }
+
+    /* ── Section tabs (1ère = tronc seul) ── */
+    .section-wrap {
+      display:none; flex-direction:column; gap:10px;
+      animation:pop .35s ease;
+    }
+    .section-wrap.show { display:flex; }
+
+    .section-label {
+      display:flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:800; text-transform:uppercase;
+      letter-spacing:.8px; color:var(--text-soft);
+    }
+    .section-label-line { flex:1; height:1px; background:var(--border); }
+
+    /* Spec cards grid */
+    .spec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; }
+    .spec-card {
+      border:2px solid var(--border); border-radius:14px;
+      padding:12px 8px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      text-align:center; background:var(--white); position:relative;
+      transition:border-color .2s, background .2s, transform .15s, box-shadow .2s;
+    }
+    .spec-card:hover { border-color:var(--indigo); background:#fafaff; transform:translateY(-2px); }
+    .spec-card.sel {
+      border-color:var(--indigo); background:var(--indigo-light);
+      box-shadow:0 4px 14px rgba(99,102,241,.18); transform:translateY(-2px);
+    }
+    .spec-emoji { font-size:24px; }
+    .spec-name  { font-size:11px; font-weight:800; color:var(--text); line-height:1.2; }
+    .spec-sub   { font-size:10px; color:var(--text-soft); line-height:1.3; }
+    .spec-tick  {
+      position:absolute; top:7px; right:7px;
+      width:18px; height:18px; border-radius:50%;
+      background:var(--indigo); color:white;
+      display:flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:900;
+      opacity:0; transform:scale(0); transition:opacity .2s,transform .2s;
+    }
+    .spec-card.sel .spec-tick { opacity:1; transform:scale(1); }
+
+    /* Tronc commun info pill */
+    .tronc-pill {
+      display:none; align-items:center; gap:10px;
+      background:var(--green-light); border:1.5px solid #86efac;
+      border-radius:var(--radius-sm); padding:10px 14px;
+      font-size:12px; color:var(--green-dark);
+      animation:pop .35s ease;
+    }
+    .tronc-pill.show { display:flex; }
+
+    /* ── Password ── */
+    .pw-wrap { position:relative; }
+    .pw-wrap input { padding-right:42px; }
+    .pw-eye {
+      position:absolute; right:12px; top:50%; transform:translateY(-50%);
+      background:none; border:none; cursor:pointer; color:var(--text-soft);
+      padding:0; line-height:1; transition:color .2s;
+    }
+    .pw-eye:hover { color:var(--indigo); }
+    .pw-eye svg { width:18px; height:18px; }
+    .pw-bar-wrap { margin-top:5px; }
+    .pw-bar-bg { height:4px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .pw-bar-fill { height:100%; border-radius:99px; width:0%; transition:width .4s,background .4s; }
+    .pw-bar-lbl { font-size:10px; color:var(--text-soft); margin-top:2px; }
+
+    /* ── Error ── */
+    .err-box {
+      display:none; background:#fef2f2; border:1.5px solid #fecaca;
+      border-radius:var(--radius-sm); padding:8px 12px;
+      font-size:12px; color:#dc2626; margin-bottom:10px;
+      gap:8px; align-items:flex-start;
+    }
+    .err-box.show { display:flex; }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width:100%; margin-top:14px; padding:12px; border:none; border-radius:var(--radius-sm);
+      font-family:'Baloo 2',cursive; font-size:15px; font-weight:800; color:white;
+      background:linear-gradient(135deg,var(--indigo),var(--blue));
+      cursor:pointer; box-shadow:0 4px 16px rgba(99,102,241,.32);
+      transition:transform .15s,box-shadow .15s,opacity .15s;
+      position:relative; overflow:hidden;
+    }
+    .btn-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 26px rgba(99,102,241,.40); }
+    .btn-submit:disabled { opacity:.68; cursor:not-allowed; }
+    .ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,.38); transform:scale(0); animation:rpl .6s linear; pointer-events:none; }
+    @keyframes rpl { to{ transform:scale(4); opacity:0; } }
+    .spinner { display:inline-block; width:17px; height:17px; border:2.5px solid rgba(255,255,255,.4); border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+
+    .card-footer { text-align:center; margin-top:12px; font-size:13px; color:var(--text-soft); }
+    .card-footer a { color:var(--indigo); font-weight:700; text-decoration:none; }
+    .card-footer a:hover { text-decoration:underline; }
+
+    @media(max-width:480px){
+      .card { padding:18px 14px 20px; }
+      .grid { grid-template-columns:1fr; }
+      .spec-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bub"></div><div class="bub"></div><div class="bub"></div>
+  <div class="bub"></div><div class="bub"></div><div class="bub"></div>
+  <div class="star">⭐</div><div class="star">✨</div><div class="star">🌟</div><div class="star">💫</div>
+</div>
+
+<div class="card">
+
+  <div class="card-header">
+    <div class="logo">
+      <div class="logo-icon"><img src="../assets/images/logo.png" alt="ORIO"/></div>
+    </div>
+    <div class="card-title">Crée ton compte</div>
+    <div class="card-subtitle">Orientation intelligente pour lycéens tunisiens 🚀</div>
+  </div>
+
+  <div class="dots">
+    <div class="dot active" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+
+  <div class="err-box" id="err"><span>⚠️</span><span id="err-msg"></span></div>
+
+  <form id="form" novalidate autocomplete="off">
+    <div class="grid">
+
+      <!-- Prénom / Nom -->
+      <div class="fg">
+        <label for="first_name">Prénom <em>*</em></label>
+        <input id="first_name" name="first_name" type="text" placeholder="Ex: Amal" required/>
+      </div>
+      <div class="fg">
+        <label for="last_name">Nom <em>*</em></label>
+        <input id="last_name" name="last_name" type="text" placeholder="Ex: Ben Aissa" required/>
+      </div>
+
+      <!-- Email -->
+      <div class="fg g-full">
+        <label for="email">Adresse e-mail <em>*</em></label>
+        <input id="email" name="email" type="email" placeholder="exemple@email.com" required/>
+      </div>
+
+      <!-- Niveau -->
+      <div class="fg g-full">
+        <label for="niveau">Niveau scolaire <em>*</em></label>
+        <div class="sel-wrap">
+          <span class="sel-icon" id="niv-icon">🏛️</span>
+          <select id="niveau" name="niveau" required onchange="onNiveau(this)">
+            <option value="" disabled selected>-- Choisis ton niveau --</option>
+            <option value="1ere">1ère année secondaire</option>
+            <option value="2eme_s">2ème année secondaire</option>
+            <option value="3eme_s">3ème année secondaire</option>
+            <option value="4eme_s">4ème année secondaire (Bac) 🎓</option>
+          </select>
+          <span class="sel-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Niveau banner -->
+      <div class="g-full">
+        <div class="niv-banner" id="niv-banner">
+          <span id="nb-emoji" style="font-size:24px"></span>
+          <div class="niv-banner-text">
+            <strong id="nb-title"></strong>
+            <small id="nb-desc"></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tronc commun info -->
+      <div class="g-full">
+        <div class="tronc-pill" id="tronc-pill">
+          <span style="font-size:24px">✅</span>
+          <div>
+            <strong>Tronc commun</strong> — Programme identique pour tous.<br>
+            <span style="font-size:12px;opacity:.85;">Tu choisiras ta section en 2ème année secondaire.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spécialité -->
+      <div class="g-full">
+        <div class="section-wrap" id="section-wrap">
+          <div class="section-label">
+            <div class="section-label-line"></div>
+            <span id="sec-label-txt">🎯 Choisis ta section</span>
+            <div class="section-label-line"></div>
+          </div>
+          <div class="spec-grid" id="spec-grid"></div>
+          <input type="hidden" id="specialite" name="specialite"/>
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="fg g-full">
+        <label for="password">Mot de passe <em>*</em></label>
+        <div class="pw-wrap">
+          <input id="password" name="password" type="password"
+                 placeholder="Minimum 8 caractères" required oninput="pwStrength(this.value)"/>
+          <button type="button" class="pw-eye" onclick="togglePw('password',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="pw-bar-wrap">
+          <div class="pw-bar-bg"><div class="pw-bar-fill" id="pw-fill"></div></div>
+          <div class="pw-bar-lbl" id="pw-lbl"></div>
+        </div>
+      </div>
+
+      <div class="fg g-full">
+        <label for="password_confirm">Confirmer le mot de passe <em>*</em></label>
+        <div class="pw-wrap">
+          <input id="password_confirm" name="password_confirm" type="password"
+                 placeholder="Répète ton mot de passe" required/>
+          <button type="button" class="pw-eye" onclick="togglePw('password_confirm',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end grid -->
+
+    <button type="submit" class="btn-submit" id="btn-submit" onclick="ripple(event)">
+      Créer mon compte 
+    </button>
+  </form>
+
+  <div class="card-footer">Déjà un compte ? <a href="login.html">Se connecter</a></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG niveaux
+// ══════════════════════════════════════════════
+const NIV = {
+  '1ere':  { emoji:'🏛️', title:'1ère année secondaire', desc:'Tronc commun — programme identique pour tous.', color:'#6366f1', light:'#e0e7ff', type:'tronc' },
+  '2eme_s':{ emoji:'⚡', title:'2ème année secondaire', desc:'Début de l\'orientation — choisis ta section.', color:'#818cf8', light:'#e0e7ff', type:'lycee2' },
+  '3eme_s':{ emoji:'🎯', title:'3ème année secondaire', desc:'Spécialisation avancée vers le Bac.',           color:'#4f46e5', light:'#ede9fe', type:'lycee3' },
+  '4eme_s':{ emoji:'🎓', title:'Terminale — Bac !',     desc:'Dernière année, on donne tout !',               color:'#7c3aed', light:'#ede9fe', type:'lycee3' },
+};
+
+// ══════════════════════════════════════════════
+//  SPÉCIALITÉS
+// ══════════════════════════════════════════════
+const SPEC_2 = [
+  { val:'scientifique', emoji:'🔬', name:'Sciences'},
+  { val:'informatique', emoji:'💻', name:'Informatique'},
+  { val:'economique',   emoji:'💰', name:'Économie & Gestion'},
+  { val:'lettres_2',    emoji:'📚', name:'Lettres'},
+];
+
+const SPEC_BAC = [
+  { val:'mathematiques', emoji:'🔢', name:'Mathématiques' },
+  { val:'sciences_exp',  emoji:'🧪', name:'Sciences expérimentales'},
+  { val:'sciences_tech', emoji:'⚙️', name:'Sciences techniques'},
+  { val:'sciences_info', emoji:'💻', name:'Sciences informatique' },
+  { val:'eco_gestion',   emoji:'📈', name:'Économie & Gestion' },
+  { val:'lettres_bac',   emoji:'📖', name:'Lettres' },
+  { val:'sport_bac',     emoji:'⚽', name:'Sport' },
+];
+
+// ══════════════════════════════════════════════
+//  NIVEAU CHANGE
+// ══════════════════════════════════════════════
+function onNiveau(sel) {
+  const val = sel.value;
+  const cfg = NIV[val];
+  if (!cfg) return;
+
+  // Icône + couleur select
+  document.getElementById('niv-icon').textContent = cfg.emoji;
+  sel.style.borderColor = cfg.color;
+  sel.style.boxShadow   = `0 0 0 3px ${cfg.color}28`;
+
+  // Banner
+  const banner = document.getElementById('niv-banner');
+  document.getElementById('nb-emoji').textContent = cfg.emoji;
+  document.getElementById('nb-title').textContent  = cfg.title;
+  document.getElementById('nb-desc').textContent   = cfg.desc;
+  banner.style.background   = cfg.light;
+  banner.style.borderColor  = cfg.color + '55';
+  banner.style.color        = cfg.color;
+  banner.classList.add('show');
+
+  // Bouton couleur
+  const btn = document.getElementById('btn-submit');
+  btn.style.background = `linear-gradient(135deg,${cfg.color},#38bdf8)`;
+  btn.style.boxShadow  = `0 4px 16px ${cfg.color}44`;
+
+  // Reset sections
+  hide('tronc-pill'); hide('section-wrap');
+  document.getElementById('specialite').value = '';
+  document.querySelectorAll('.spec-card').forEach(c => c.classList.remove('sel'));
+
+  // Dots
+  dot('d1','done'); dot('d2','active');
+
+  if (cfg.type === 'tronc') {
+    show('tronc-pill');
+    document.getElementById('specialite').value = 'tronc_commun';
+    dot('d2','done'); dot('d3','active');
+  } else if (cfg.type === 'lycee2') {
+    buildSpecs(SPEC_2, '⚡ Ta section en 2ème année');
+  } else if (cfg.type === 'lycee3') {
+    buildSpecs(SPEC_BAC, '🎓 Ta section du Bac');
+  }
+}
+
+function buildSpecs(specs, label) {
+  document.getElementById('sec-label-txt').textContent = label;
+  document.getElementById('spec-grid').innerHTML = specs.map(s => `
+    <div class="spec-card" id="sc-${s.val}" onclick="pickSpec('${s.val}')">
+      <div class="spec-tick">✓</div>
+      <div class="spec-emoji">${s.emoji}</div>
+      <div class="spec-name">${s.name}</div>
+      <div class="spec-sub">${s.sub}</div>
+    </div>
+  `).join('');
+  show('section-wrap');
+}
+
+function pickSpec(val) {
+  document.querySelectorAll('.spec-card').forEach(c => c.classList.remove('sel'));
+  document.getElementById('sc-' + val)?.classList.add('sel');
+  document.getElementById('specialite').value = val;
+  dot('d2','done'); dot('d3','active');
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function show(id) { document.getElementById(id).classList.add('show'); }
+function hide(id) { document.getElementById(id).classList.remove('show'); }
+function dot(id, cls) {
+  const el = document.getElementById(id);
+  el.className = 'dot';
+  if (cls) el.classList.add(cls);
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const isTxt = inp.type === 'text';
+  inp.type = isTxt ? 'password' : 'text';
+  btn.querySelector('svg').innerHTML = isTxt
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+}
+
+function pwStrength(v) {
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const L = [
+    {w:'0%',  c:'#e2e8f0', t:''},
+    {w:'25%', c:'#f87171', t:'⚠️ Trop facile'},
+    {w:'50%', c:'#fbbf24', t:'🔒 Moyen'},
+    {w:'75%', c:'#34d399', t:'✅ Bien !'},
+    {w:'100%',c:'#6366f1', t:'🔐 Excellent !'},
+  ];
+  const l = L[v.length === 0 ? 0 : s];
+  document.getElementById('pw-fill').style.cssText = `width:${l.w};background:${l.c}`;
+  document.getElementById('pw-lbl').textContent = l.t;
+}
+
+function ripple(e) {
+  const btn = e.currentTarget;
+  const c = document.createElement('span');
+  const d = Math.max(btn.clientWidth, btn.clientHeight);
+  const r = btn.getBoundingClientRect();
+  c.className = 'ripple';
+  c.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+  btn.appendChild(c);
+  setTimeout(() => c.remove(), 700);
+}
+
+function showErr(msg) {
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('err').classList.add('show');
+  document.getElementById('err').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ══════════════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════════════
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const btn  = document.getElementById('btn-submit');
+  document.getElementById('err').classList.remove('show');
+
+  // Validations
+  if (!form.niveau.value)         { showErr('Choisis ton niveau scolaire. 🏛️'); return; }
+  if (form.password.value !== form.password_confirm.value) { showErr('Les mots de passe ne correspondent pas. 🔑'); return; }
+
+  const nCfg   = NIV[form.niveau.value];
+  const specVal = document.getElementById('specialite').value;
+  if (nCfg && (nCfg.type === 'lycee2' || nCfg.type === 'lycee3') && !specVal) {
+    showErr('Choisis ta section / spécialité. 🎯');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Création du compte…';
+
+  const payload = {
+    email:            form.email.value.trim(),
+    first_name:       form.first_name.value.trim(),
+    last_name:        form.last_name.value.trim(),
+    niveau:           form.niveau.value,
+    specialite:       specVal || null,
+    password:         form.password.value,
+    password_confirm: form.password_confirm.value,
+  };
+
+  try {
+    const res  = await fetch('http://127.0.0.1:8000/api/auth/register/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      btn.innerHTML = '✅ Compte créé ! Redirection vers connexion…';
+      btn.style.background = 'linear-gradient(135deg,#059669,#34d399)';
+      setTimeout(() => window.location.href = './dashboard.html', 1200);
+    } else {
+      showErr(Object.values(data).flat().join(' '));
+      btn.disabled = false;
+      btn.innerHTML = 'Créer mon compte 🎉';
+    }
+  } catch {
+    showErr('Erreur réseau. Vérifie ta connexion. 🌐');
+    btn.disabled = false;
+    btn.innerHTML = 'Créer mon compte 🎉';
+  }
+});
+</script>
+</body>
+</html>
