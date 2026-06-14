@@ -1,0 +1,6 @@
+[submodule "PPG_front"]
+	path = PPG_front
+	url = https://github.com/Amalbenaissa2003/PPG_front.git
+[submodule "PPG_backend"]
+	path = PPG_backend
+	url = https://github.com/Amalbenaissa2003/PPG_backend.git
